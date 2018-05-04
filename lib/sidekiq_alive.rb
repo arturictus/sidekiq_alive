@@ -1,4 +1,5 @@
 require "sidekiq_alive/version"
+require 'sidekiq'
 
 module SidekiqAlive
   def self.start
@@ -7,6 +8,10 @@ module SidekiqAlive
         SidekiqAlive::Server.start
       end
     end
+  end
+
+  def self.setup
+    yield(self)
   end
 
   def self.port=(port)
@@ -30,7 +35,7 @@ module SidekiqAlive
   end
 
   def self.time_to_live
-    @time_to_live || 10.minutes
+    @time_to_live || 10 * 60
   end
 
   def self.after_storing_key=(block)
@@ -38,7 +43,15 @@ module SidekiqAlive
   end
 
   def self.after_storing_key
-    @after_storing_key || proc { "do nothing" }
+    @after_storing_key || proc {} # do nothing
+  end
+
+  def self.before_storing_key=(block)
+    @before_storing_key = block
+  end
+
+  def self.before_storing_key
+    @before_storing_key || proc {} # do nothing
   end
 
 end

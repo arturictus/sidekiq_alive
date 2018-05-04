@@ -10,6 +10,22 @@ module SidekiqAlive
     end
   end
 
+  def self.store_alive_key
+    redis.set(liveness_key,
+              Time.now.to_i,
+              { ex: time_to_live.to_i })
+  end
+
+  def self.redis
+    Sidekiq.redis { |r| r }
+  end
+
+  def self.alive?
+    redis.ttl(liveness_key) == -2 ? false : true
+  end
+
+  # CONFIG ---------------------------------------
+
   def self.setup
     yield(self)
   end
@@ -38,20 +54,12 @@ module SidekiqAlive
     @time_to_live || 10 * 60
   end
 
-  def self.after_storing_key=(block)
+  def self.callback=(block)
     @after_storing_key = block
   end
 
-  def self.after_storing_key
+  def self.callback
     @after_storing_key || proc {} # do nothing
-  end
-
-  def self.before_storing_key=(block)
-    @before_storing_key = block
-  end
-
-  def self.before_storing_key
-    @before_storing_key || proc {} # do nothing
   end
 
 end

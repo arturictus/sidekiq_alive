@@ -1,8 +1,6 @@
 # SidekiqAlive
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/sidekiq_alive`. To experiment with that code, run `bin/console` for an interactive prompt.
 
-TODO: Delete this and the text above, and describe your gem
 
 ## Installation
 
@@ -21,8 +19,66 @@ Or install it yourself as:
     $ gem install sidekiq_alive
 
 ## Usage
+### start the server
+rails example:
 
-TODO: Write usage instructions here
+`config/initializers/sidekiq.rb`
+
+```ruby
+SidekiqAlive..start
+```
+
+### Run the job for first time
+It should only be run on the first time you deploy the app.
+It would reschedule itself.
+
+rails example:
+```
+$ bundle exec rails console
+
+#=> SidekiqAlive.perform_now
+```
+
+### Kubernetes setup
+
+Add to your kubernetes the deployment your the livenessProbe
+
+example with recommended setup:
+
+```yaml
+spec:
+  containers:
+    - name: my_app
+      image: my_app:latest
+      env:
+        - name: RAILS_ENV
+          value: production
+      command:
+        - bundle
+        - exec
+        - sidekiq
+      ports:
+        - containerPort: 7433
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 7433
+        initialDelaySeconds: 80 # app specific. Time your sidekiq takes to start processing.
+        timeoutSeconds: 5 # can be much less
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 7433
+        initialDelaySeconds: 80 # app specific
+        timeoutSeconds: 5 # can be much less
+      lifecycle:
+        preStop:
+          exec:
+            # SIGTERM triggers a quick exit; gracefully terminate instead
+            command: ["bundle", "exec", "sidekiqctl", "quiet"]
+  terminationGracePeriodSeconds: 60 # put your longest Job time here plus security time.
+```
+
 
 ## Development
 

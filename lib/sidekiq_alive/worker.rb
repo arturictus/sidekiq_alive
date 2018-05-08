@@ -1,10 +1,11 @@
 module SidekiqAlive
   class Worker
     include Sidekiq::Worker
-    # retry false
+    sidekiq_options retry: false
+
     def perform
       write_living_probe
-      self.class.perform_in(SidekiqAlive.time_to_live / 3)
+      self.class.perform_in(SidekiqAlive.time_to_live / 2)
     end
 
     def write_living_probe

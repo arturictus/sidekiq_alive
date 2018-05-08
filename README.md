@@ -1,5 +1,15 @@
 # SidekiqAlive
 
+SidekiqAlive offers a solution to add liveness probe of a Sidekiq instance.
+
+__How?__
+
+A http server is started and on each requests validates that a liveness key is stored in Redis. If it is there means is working.
+
+A Sidekiq job is the responsable to storing this key. If Sidekiq stops processing jobs
+this key gets expired by Redis an consequently the http server will return a 500 error.
+
+This Job is responsible to requeue itself for the next liveness probe.
 
 
 ## Installation
@@ -19,7 +29,9 @@ Or install it yourself as:
     $ gem install sidekiq_alive
 
 ## Usage
+
 ### start the server
+
 rails example:
 
 `config/initializers/sidekiq.rb`
@@ -29,6 +41,7 @@ SidekiqAlive..start
 ```
 
 ### Run the job for first time
+
 It should only be run on the first time you deploy the app.
 It would reschedule itself.
 
@@ -41,7 +54,7 @@ $ bundle exec rails console
 
 ### Kubernetes setup
 
-Add to your kubernetes the deployment your the livenessProbe
+Set `livenessProbe` in your Kubernetes deployment
 
 example with recommended setup:
 
@@ -90,14 +103,14 @@ SidekiqAlive.setup do |config|
   #   config.port = 7433
 
   # ==> Liveness key
-  # Key to be stored in redis as probe of liveness
+  # Key to be stored in Redis as probe of liveness
   # default: "SIDEKIQ::LIVENESS_PROBE_TIMESTAMP"
   #
   #   config.liveness_key = "SIDEKIQ::LIVENESS_PROBE_TIMESTAMP"
 
   # ==> Time to live
-  # Time for the key to be kept by redis.
-  # Here is where you can set de periodicity that the sidekiq has to probe it is working
+  # Time for the key to be kept by Redis.
+  # Here is where you can set de periodicity that the Sidekiq has to probe it is working
   # Time unit: seconds
   # default: 10 * 60 # 10 minutes
   #
@@ -117,16 +130,12 @@ end
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/sidekiq_alive. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/arturictus/sidekiq_alive. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-## Code of Conduct
-
-Everyone interacting in the SidekiqAlive project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/sidekiq_alive/blob/master/CODE_OF_CONDUCT.md).

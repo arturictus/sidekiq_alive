@@ -1,24 +1,17 @@
 module SidekiqAlive
   class Worker
     include Sidekiq::Worker
+    # retry false
     def perform
-      do_snitch
-      write_living_check
-      self.class.perform_in(3.minutes)
+      write_living_probe
+      self.class.perform_in(SidekiqAlive.time_to_live / 3)
     end
 
-    def do_snitch
-      # TODO use form config
-      snitch = ENV['SIDEKIQ_SNITCH']
-      return unless snitch
-      HTTP.get(snitch)
-    rescue
-      # nop
-    end
-
-    def write_living_check
-      # TODO use from config
-      SidekiqAlive::Server.store_alive_key
+    def write_living_probe
+      # Write liveness probe
+      SidekiqAlive.store_alive_key
+      # after callbacks
+      SidekiqAlive.callback.call()
     end
   end
 end

@@ -1,6 +1,6 @@
 # SidekiqAlive
 
-SidekiqAlive offers a solution to add liveness probe of a Sidekiq instance.
+SidekiqAlive offers a solution to add liveness probe for a Sidekiq instance deployed in Kubernetes.
 
 __How?__
 

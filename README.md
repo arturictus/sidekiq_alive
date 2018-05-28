@@ -37,7 +37,7 @@ rails example:
 `config/initializers/sidekiq.rb`
 
 ```ruby
-SidekiqAlive..start
+SidekiqAlive.start
 ```
 
 ### Run the job for first time
@@ -49,7 +49,7 @@ rails example:
 ```
 $ bundle exec rails console
 
-#=> SidekiqAlive.perform_now
+#=> SidekiqAlive::Worker.perform_async
 ```
 
 ### Kubernetes setup

@@ -1,5 +1,6 @@
 require "sidekiq_alive/version"
 require 'sidekiq'
+require 'pry'
 
 module SidekiqAlive
   def self.start
@@ -36,6 +37,14 @@ module SidekiqAlive
 
   def self.port
     @port || 7433
+  end
+
+  def self.queue_name=(queue_name)
+    @queue_name = queue_name
+  end
+
+  def self.queue_name
+    @queue_name || "default"
   end
 
   def self.liveness_key=(key)

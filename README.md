@@ -9,8 +9,10 @@ A http server is started and on each requests validates that a liveness key is s
 A Sidekiq job is the responsible for storing this key. If Sidekiq stops processing jobs
 this key gets expired by Redis an consequently the http server will return a 500 error.
 
-Each sidekiq instance is configured to have a unique queue that ensures that its `SidekiqAlive::Worker` only process
-jobs for its instance.
+Each sidekiq instance is configured to have unique queue that ensures that its `SidekiqAlive::Worker` only process
+jobs for its instance, this is determined by the queue_variant config value. By default this uses the seconds since the
+epoch that the server process started at. For a determinate variant use `SidekiqAlive.queue_variant =
+'host-specific-variant'` in your initializer.
 
 This Job is responsible to requeue itself for the next liveness probe.
 
@@ -38,7 +40,7 @@ configure the `queue_name` on SidekiqAlive to match.
 
 ```yaml
   :queues:
-    - ['unique_name_for_this_instances_alive_queue', 10]
+    - ['name_for_queue', 1]
     - [high, 10]
     - [default, 5]
     - [low, 1]
@@ -48,10 +50,15 @@ configure the `queue_name` on SidekiqAlive to match.
 
 rails example:
 
-`config/initializers/sidekiq.rb`
+`config/initializers/sidekiq_monitoring.rb`
 
 ```ruby
+SidekiqAlive.setup do |config|
+  config.queue_name = "sidekiq_alive"
+  config.queue_variant = "#{`hostname`.squish}"
+end
 SidekiqAlive.start
+SidekiqAlive::Worker.perform_async
 ```
 
 ### Run the job for first time

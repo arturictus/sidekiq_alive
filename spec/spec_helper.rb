@@ -1,8 +1,7 @@
 require "bundler/setup"
 require "sidekiq_alive"
 require "rspec-sidekiq"
-require 'mock_redis'
-
+require "mock_redis"
 # initialize server
 SidekiqAlive::Server.start
 

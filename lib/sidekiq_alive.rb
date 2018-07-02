@@ -25,6 +25,10 @@ module SidekiqAlive
     redis.ttl(liveness_key) == -2 ? false : true
   end
 
+  def self.queue_with_variant
+    "#{queue_name}-#{queue_variant}"
+  end
+
   # CONFIG ---------------------------------------
 
   def self.setup
@@ -40,11 +44,19 @@ module SidekiqAlive
   end
 
   def self.queue_name=(queue_name)
-    @queue_name = queue_name
+    @queue_name = queue_name.to_s
+  end
+
+  def self.queue_variant=(variant)
+    @queue_variant = variant.to_s
   end
 
   def self.queue_name
     @queue_name || "default"
+  end
+
+  def self.queue_variant
+    @queue_variant ||= Time.now.to_i.to_s
   end
 
   def self.liveness_key=(key)

@@ -12,7 +12,11 @@ module SidekiqAlive
       # Write liveness probe
       SidekiqAlive.store_alive_key
       # after callbacks
-      SidekiqAlive.callback.call()
+      config.callback.call()
+    end
+
+    def config
+      SidekiqAlive.config
     end
   end
 end

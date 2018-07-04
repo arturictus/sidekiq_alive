@@ -2,8 +2,9 @@ require "bundler/setup"
 require "sidekiq_alive"
 require "rspec-sidekiq"
 require "mock_redis"
+require 'rack/test'
+ENV['RACK_ENV'] = 'test'
 # initialize server
-SidekiqAlive::Server.start
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -5,7 +5,7 @@ RSpec.describe SidekiqAlive do
   end
 
   it 'configurations behave as expected' do
-    k = described_class
+    k = described_class.config
     expect(k.port).to eq 7433
     k.port = 4567
     expect(k.port).to eq 4567
@@ -29,9 +29,9 @@ RSpec.describe SidekiqAlive do
 
   it '::store_alive_key" stores key with the expected ttl' do
     redis = SidekiqAlive.redis
-    expect(redis.ttl(SidekiqAlive.liveness_key)).to eq -2
+    expect(redis.ttl(SidekiqAlive.config.liveness_key)).to eq -2
     SidekiqAlive.store_alive_key
-    expect(redis.ttl(SidekiqAlive.liveness_key)).to eq SidekiqAlive.time_to_live
+    expect(redis.ttl(SidekiqAlive.config.liveness_key)).to eq SidekiqAlive.config.time_to_live
   end
 
   it "::alive?" do

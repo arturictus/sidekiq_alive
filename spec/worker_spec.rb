@@ -20,23 +20,6 @@ RSpec.describe SidekiqAlive::Worker do
     expect(n).to eq 2
   end
 
-  it 'uses the configured values' do
-    SidekiqAlive.setup do |config|
-      config.queue_name = "sidekiq_alive"
-      config.queue_variant = 'hostname'
-    end
-
-    expect(described_class).to receive(:set)
-      .with(queue: 'sidekiq_alive-hostname')
-      .and_call_original
-    expect(described_class).to receive(:perform_in)
-      .with(SidekiqAlive.config.time_to_live / 2)
-      .and_call_original
-
-    allow(SidekiqAlive).to receive(:store_alive_key)
-    perform
-  end
-
   describe 'clean_old_queues' do
     subject(:clean_old_queues) { described_class.new.clean_old_queues }
 

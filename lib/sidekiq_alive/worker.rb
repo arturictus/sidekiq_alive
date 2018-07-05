@@ -2,7 +2,7 @@ require "sidekiq/api"
 module SidekiqAlive
   class Worker
     include Sidekiq::Worker
-    sidekiq_options retry: false
+    sidekiq_options retry: false, queue: SidekiqAlive.config.queue_with_variant
 
     def perform
       write_living_probe

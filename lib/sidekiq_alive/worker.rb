@@ -1,18 +1,30 @@
+require "sidekiq/api"
 module SidekiqAlive
   class Worker
     include Sidekiq::Worker
-    sidekiq_options retry: false
+    sidekiq_options retry: false, queue: SidekiqAlive.config.queue_with_variant
 
     def perform
       write_living_probe
-      self.class.perform_in(SidekiqAlive.time_to_live / 2)
+      clean_old_queues
+      self.class.set(queue: config.queue_with_variant).perform_in(config.time_to_live / 2)
+    end
+
+    def clean_old_queues
+      Sidekiq::Queue.all.each do |queue|
+        queue.clear if queue.name =~ /#{config.queue_name}/ && queue.latency > config.time_to_live
+      end
     end
 
     def write_living_probe
       # Write liveness probe
       SidekiqAlive.store_alive_key
       # after callbacks
-      SidekiqAlive.callback.call()
+      config.callback.call()
+    end
+
+    def config
+      SidekiqAlive.config
     end
   end
 end

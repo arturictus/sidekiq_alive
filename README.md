@@ -1,16 +1,20 @@
 # SidekiqAlive
 
-SidekiqAlive offers a solution to add liveness probe for a Sidekiq instance deployed in Kubernetes.
+SidekiqAlive offers a solution to add liveness probe for Sidekiq instances deployed in Kubernetes.
 
 __How?__
 
 A http server is started and on each requests validates that a liveness key is stored in Redis. If it is there means is working.
 
-A Sidekiq job is the responsable to storing this key. If Sidekiq stops processing jobs
+A Sidekiq job is the responsible for storing this key. If Sidekiq stops processing jobs
 this key gets expired by Redis an consequently the http server will return a 500 error.
 
-This Job is responsible to requeue itself for the next liveness probe.
+Each sidekiq instance is configured to have unique queue that ensures that its `SidekiqAlive::Worker` only process
+jobs for its instance, this is determined by the queue_variant config value. By default this uses the seconds since the
+epoch that the server process started at. For a determinate variant use `SidekiqAlive.queue_variant =
+'host-specific-variant'` in your initializer.
 
+This Job is responsible to requeue itself for the next liveness probe.
 
 ## Installation
 
@@ -30,14 +34,31 @@ Or install it yourself as:
 
 ## Usage
 
+### Update sidekiq.yml
+A queue for each instance should be created, add the following to your processing queues in `sidekiq.yml`, you need to
+configure the `queue_name` on SidekiqAlive to match.
+
+```yaml
+  :queues:
+    - ['name_for_queue', 1]
+    - [high, 10]
+    - [default, 5]
+    - [low, 1]
+```
+
 ### start the server
 
 rails example:
 
-`config/initializers/sidekiq.rb`
+`config/initializers/sidekiq_monitoring.rb`
 
 ```ruby
-SidekiqAlive..start
+SidekiqAlive.setup do |config|
+  config.queue_name = "sidekiq_alive"
+  config.queue_variant = "#{`hostname`.squish}"
+end
+SidekiqAlive.start
+SidekiqAlive::Worker.perform_async
 ```
 
 ### Run the job for first time
@@ -49,7 +70,7 @@ rails example:
 ```
 $ bundle exec rails console
 
-#=> SidekiqAlive.perform_now
+#=> SidekiqAlive::Worker.perform
 ```
 
 ### Kubernetes setup
@@ -107,6 +128,12 @@ SidekiqAlive.setup do |config|
   # default: "SIDEKIQ::LIVENESS_PROBE_TIMESTAMP"
   #
   #   config.liveness_key = "SIDEKIQ::LIVENESS_PROBE_TIMESTAMP"
+
+  # ==> Queue to process
+  # The queue that this sidekiq instance will process, should be unique per instance
+  # default: "default"
+  #
+  #   config.queue_name = "unique_name_for_this_instances_alive_queues"
 
   # ==> Time to live
   # Time for the key to be kept by Redis.

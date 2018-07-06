@@ -1,5 +1,7 @@
+require "sidekiq"
+require "singleton"
 require "sidekiq_alive/version"
-require 'sidekiq'
+require "sidekiq_alive/config"
 
 module SidekiqAlive
   def self.start
@@ -11,9 +13,9 @@ module SidekiqAlive
   end
 
   def self.store_alive_key
-    redis.set(liveness_key,
+    redis.set(config.liveness_key,
               Time.now.to_i,
-              { ex: time_to_live.to_i })
+              { ex: config.time_to_live.to_i })
   end
 
   def self.redis
@@ -21,48 +23,19 @@ module SidekiqAlive
   end
 
   def self.alive?
-    redis.ttl(liveness_key) == -2 ? false : true
+    redis.ttl(config.liveness_key) == -2 ? false : true
   end
 
   # CONFIG ---------------------------------------
 
   def self.setup
-    yield(self)
+    yield(config)
   end
 
-  def self.port=(port)
-    @port = port
+  def self.config
+    @config ||= SidekiqAlive::Config.instance
   end
-
-  def self.port
-    @port || 7433
-  end
-
-  def self.liveness_key=(key)
-    @liveness_key = key
-  end
-
-  def self.liveness_key
-    @liveness_key || "SIDEKIQ::LIVENESS_PROBE_TIMESTAMP"
-  end
-
-  def self.time_to_live=(time)
-    @time_to_live = time
-  end
-
-  def self.time_to_live
-    @time_to_live || 10 * 60
-  end
-
-  def self.callback=(block)
-    @after_storing_key = block
-  end
-
-  def self.callback
-    @after_storing_key || proc {} # do nothing
-  end
-
 end
 
-require 'sidekiq_alive/server'
-require 'sidekiq_alive/worker'
+require "sidekiq_alive/worker"
+require "sidekiq_alive/server"

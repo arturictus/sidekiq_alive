@@ -7,7 +7,7 @@ module SidekiqAlive
   def self.start
     Sidekiq.configure_server do |config|
       config.on(:startup) do
-        SidekiqAlive::Worker.set(queue: SidekiqAlive.config.queue_with_variant).perform_async
+        SidekiqAlive::Worker.perform_async
         SidekiqAlive::Server.start
       end
     end

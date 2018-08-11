@@ -5,7 +5,7 @@ module SidekiqAlive
 
     def perform
       write_living_probe
-      self.class.perform_in(SidekiqAlive.time_to_live / 2)
+      self.class.perform_in(config.time_to_live / 2)
     end
 
     def write_living_probe

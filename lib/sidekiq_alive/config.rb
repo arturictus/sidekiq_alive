@@ -9,6 +9,7 @@ module SidekiqAlive
       @liveness_key = 'SIDEKIQ::LIVENESS_PROBE_TIMESTAMP'
       @time_to_live = 10 * 60
       @callback = proc {}
+      @hostname_prefix = ''
     end
   end
 end

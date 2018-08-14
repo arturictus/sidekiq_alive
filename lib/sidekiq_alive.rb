@@ -14,7 +14,7 @@ module SidekiqAlive
   end
 
   def self.store_alive_key
-    redis.set(config.liveness_key,
+    redis.set(current_lifeness_key,
               Time.now.to_i,
               { ex: config.time_to_live.to_i })
   end
@@ -24,7 +24,7 @@ module SidekiqAlive
   end
 
   def self.alive?
-    redis.ttl(config.liveness_key) == -2 ? false : true
+    redis.ttl(current_lifeness_key) == -2 ? false : true
   end
 
   # CONFIG ---------------------------------------
@@ -35,6 +35,18 @@ module SidekiqAlive
 
   def self.config
     @config ||= SidekiqAlive::Config.instance
+  end
+
+  def self.current_lifeness_key
+    "#{config.liveness_key}::#{hostname}"
+  end
+
+  def self.hostname
+    ENV['HOSTNAME'] || 'HOSTNAME_NOT_SET'
+  end
+
+  def self.clean_up
+
   end
 end
 

@@ -29,9 +29,16 @@ RSpec.describe SidekiqAlive do
 
   it '::store_alive_key" stores key with the expected ttl' do
     redis = SidekiqAlive.redis
-    expect(redis.ttl(SidekiqAlive.config.liveness_key)).to eq -2
+    expect(redis.ttl(SidekiqAlive.current_lifeness_key)).to eq -2
     SidekiqAlive.store_alive_key
-    expect(redis.ttl(SidekiqAlive.config.liveness_key)).to eq SidekiqAlive.config.time_to_live
+    expect(redis.ttl(SidekiqAlive.current_lifeness_key)).to eq SidekiqAlive.config.time_to_live
+  end
+
+  it '::current_lifeness_key' do
+    expect(SidekiqAlive.current_lifeness_key).to include "::HOSTNAME_NOT_SET"
+  end
+  it '::hostname' do
+    expect(SidekiqAlive.hostname).to eq "HOSTNAME_NOT_SET"
   end
 
   it "::alive?" do
@@ -39,6 +46,12 @@ RSpec.describe SidekiqAlive do
     expect(SidekiqAlive.alive?).to be false
     SidekiqAlive.store_alive_key
     expect(SidekiqAlive.alive?).to be true
+  end
+
+  it "registered_instances" do
+    expect(SidekiqAlive.registered_instances).to eq []
+    SidekiqAlive.register_current_instance
+    expect(SidekiqAlive.registered_instances.count).to eq 1
   end
 
 end

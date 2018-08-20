@@ -3,6 +3,7 @@ require "sidekiq_alive"
 require "rspec-sidekiq"
 require "mock_redis"
 require 'rack/test'
+require 'pry'
 ENV['RACK_ENV'] = 'test'
 # initialize server
 

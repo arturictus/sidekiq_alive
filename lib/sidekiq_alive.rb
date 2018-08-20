@@ -13,6 +13,20 @@ module SidekiqAlive
     end
   end
 
+  def self.register_current_instance
+    redis.set(current_instance_register_key,
+              Time.now.to_i,
+              { ex: config.time_to_live.to_i + 60 })
+  end
+
+  def self.registered_instances
+    redis.keys("#{config.registered_instance_key}::*")
+  end
+
+  def self.current_instance_register_key
+    "#{config.registered_instance_key}::#{hostname}"
+  end
+
   def self.store_alive_key
     redis.set(current_lifeness_key,
               Time.now.to_i,
@@ -43,10 +57,6 @@ module SidekiqAlive
 
   def self.hostname
     ENV['HOSTNAME'] || 'HOSTNAME_NOT_SET'
-  end
-
-  def self.clean_up
-
   end
 end
 

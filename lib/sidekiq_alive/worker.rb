@@ -5,25 +5,28 @@ module SidekiqAlive
 
     def perform(hostname = SidekiqAlive.hostname)
       return unless hostname_registered?(hostname)
+      binding.pry
       if current_hostname == hostname
-        SidekiqAlive.register_current_instance
         write_living_probe
-
+        # schedule next living probe
         self.class.perform_in(config.time_to_live / 2, current_hostname)
       else
+        # requeue for hostname to validate it's own liveness probe
         self.class.perform_async(hostname)
       end
     end
 
     def hostname_registered?(hostname)
       SidekiqAlive.registered_instances.any? do |ri|
-        ri =~ /#{hostname}/
+        /#{hostname}/ =~ ri
       end
     end
 
     def write_living_probe
       # Write liveness probe
       SidekiqAlive.store_alive_key
+      # Increment ttl for current registered instance
+      SidekiqAlive.register_current_instance
       # after callbacks
       config.callback.call()
     end

@@ -5,6 +5,7 @@ require "mock_redis"
 require 'rack/test'
 require 'pry'
 ENV['RACK_ENV'] = 'test'
+ENV['HOSTNAME'] = 'test-hostname'
 # initialize server
 
 RSpec.configure do |config|

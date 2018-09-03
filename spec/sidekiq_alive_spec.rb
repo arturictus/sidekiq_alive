@@ -35,10 +35,10 @@ RSpec.describe SidekiqAlive do
   end
 
   it '::current_lifeness_key' do
-    expect(SidekiqAlive.current_lifeness_key).to include "::HOSTNAME_NOT_SET"
+    expect(SidekiqAlive.current_lifeness_key).to include "::test-hostname"
   end
   it '::hostname' do
-    expect(SidekiqAlive.hostname).to eq "HOSTNAME_NOT_SET"
+    expect(SidekiqAlive.hostname).to eq 'test-hostname'
   end
 
   it "::alive?" do
@@ -52,6 +52,7 @@ RSpec.describe SidekiqAlive do
     expect(SidekiqAlive.registered_instances).to eq []
     SidekiqAlive.register_current_instance
     expect(SidekiqAlive.registered_instances.count).to eq 1
+    expect(SidekiqAlive.registered_instances.first).to include 'test-hostname'
   end
 
 end

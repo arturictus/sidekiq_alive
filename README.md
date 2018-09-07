@@ -35,6 +35,15 @@ Or install it yourself as:
 
 SidekiqAlive will start when running `sidekiq` command.
 
+
+__how to disable?__
+You can disabled by setting `ENV` variable `DISABLE_SIDEKIQ_ALIVE`
+example:
+
+```
+DISABLE_SIDEKIQ_ALIVE=true bundle exec sidekiq
+```
+
 ### Kubernetes setup
 
 Set `livenessProbe` in your Kubernetes deployment

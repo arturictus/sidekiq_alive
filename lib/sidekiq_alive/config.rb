@@ -9,7 +9,7 @@ module SidekiqAlive
                   :registered_instance_key
 
     def initialize
-      @port = 7433
+      @port = ENV['SIDEKIQ_ALIVE_PORT'] || 7433
       @liveness_key = 'SIDEKIQ::LIVENESS_PROBE_TIMESTAMP'
       @time_to_live = 10 * 60
       @callback = proc {}

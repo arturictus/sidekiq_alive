@@ -7,17 +7,17 @@ module SidekiqAlive
   def self.start
     Sidekiq.configure_server do |config|
       config.on(:startup) do
-        SidekiqAlive.logger.info(banner)
-        SidekiqAlive.register_current_instance
-        SidekiqAlive.store_alive_key
-        SidekiqAlive::Worker.perform_async
-        SidekiqAlive::Server.start
-        SidekiqAlive.logger.info(successful_startup_text)
+        SidekiqAlive.tap do |sa|
+          sa.logger.info(banner)
+          sa.register_current_instance
+          sa.store_alive_key
+          sa::Worker.perform_async
+          sa::Server.start
+          sa.logger.info(successful_startup_text)
+        end
       end
     end
   end
-
-
 
   def self.register_current_instance
     redis.set(current_instance_register_key,
@@ -91,7 +91,7 @@ module SidekiqAlive
 
     Registered instances:
 
-      - #{registered_instances.join("\n  - ")}
+      - #{registered_instances.join("\n\s\s- ")}
     BANNER
   end
 end
@@ -99,4 +99,4 @@ end
 require "sidekiq_alive/worker"
 require "sidekiq_alive/server"
 
-SidekiqAlive.start
+SidekiqAlive.start unless ENV['DISABLE_SIDEKIQ_ALIVE']

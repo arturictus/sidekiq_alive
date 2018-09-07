@@ -6,8 +6,6 @@ module SidekiqAlive
 
     class << self
       def start
-        Sidekiq::Logging.logger.info "Writing SidekiqAlive alive key in redis: #{SidekiqAlive.config.liveness_key}"
-        SidekiqAlive.store_alive_key
         set :port, SidekiqAlive.config.port
         Thread.start { run! }
       end
@@ -24,7 +22,7 @@ module SidekiqAlive
         body "Alive!"
       else
         response = "Can't find the alive key"
-        Sidekiq::Logging.logger.error(response)
+        SidekiqAlive.logger.error(response)
         status 404
         body response
       end

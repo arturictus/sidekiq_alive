@@ -1,6 +1,7 @@
 # SidekiqAlive
 
 SidekiqAlive offers a solution to add liveness probe for a Sidekiq instance deployed in Kubernetes.
+This library can be used to check sidekiq health outside kubernetes.
 
 __How?__
 
@@ -10,6 +11,8 @@ A Sidekiq job is the responsable to storing this key. If Sidekiq stops processin
 this key gets expired by Redis an consequently the http server will return a 500 error.
 
 This Job is responsible to requeue itself for the next liveness probe.
+
+Each instance in kubernetes will be checked based on `ENV` variable `HOSTNAME` (kubernetes sets this for each replica/pod).
 
 
 ## Installation
@@ -30,27 +33,7 @@ Or install it yourself as:
 
 ## Usage
 
-### start the server
-
-rails example:
-
-`config/initializers/sidekiq.rb`
-
-```ruby
-SidekiqAlive.start
-```
-
-### Run the job for first time
-
-It should only be run on the first time you deploy the app.
-It would reschedule itself.
-
-rails example:
-```
-$ bundle exec rails console
-
-#=> SidekiqAlive::Worker.perform_async
-```
+SidekiqAlive will start when running `sidekiq` command.
 
 ### Kubernetes setup
 
@@ -90,6 +73,22 @@ spec:
             # SIGTERM triggers a quick exit; gracefully terminate instead
             command: ["bundle", "exec", "sidekiqctl", "quiet"]
   terminationGracePeriodSeconds: 60 # put your longest Job time here plus security time.
+```
+
+### Outside kubernetes
+
+It's just up to you how you want to use it.
+
+An example in local would be:
+
+```
+bundle exec sidekiq
+# let it initialize ...
+```
+
+```
+curl localhost:7433
+#=> Alive!
 ```
 
 ## Options

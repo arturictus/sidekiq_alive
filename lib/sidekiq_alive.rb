@@ -7,11 +7,17 @@ module SidekiqAlive
   def self.start
     Sidekiq.configure_server do |config|
       config.on(:startup) do
+        SidekiqAlive.logger.info(banner)
+        SidekiqAlive.register_current_instance
+        SidekiqAlive.store_alive_key
         SidekiqAlive::Worker.perform_async
         SidekiqAlive::Server.start
+        SidekiqAlive.logger.info(successful_startup_text)
       end
     end
   end
+
+
 
   def self.register_current_instance
     redis.set(current_instance_register_key,
@@ -47,6 +53,10 @@ module SidekiqAlive
     yield(config)
   end
 
+  def self.logger
+    Sidekiq::Logging.logger
+  end
+
   def self.config
     @config ||= SidekiqAlive::Config.instance
   end
@@ -58,7 +68,35 @@ module SidekiqAlive
   def self.hostname
     ENV['HOSTNAME'] || 'HOSTNAME_NOT_SET'
   end
+
+  ##
+
+  def self.banner
+    <<-BANNER.strip_heredoc
+    =================== SidekiqAlive =================
+
+    Hostname: #{hostname}
+    Liveness key: #{current_lifeness_key}
+    Port: #{config.port}
+    Time to live: #{config.time_to_live}s
+    Current instance register key: #{current_instance_register_key}
+
+    starting ...
+    BANNER
+  end
+
+  def self.successful_startup_text
+    <<-BANNER.strip_heredoc
+    =================== SidekiqAlive Ready! =================
+
+    Registered instances:
+
+      - #{registered_instances.join("\n  - ")}
+    BANNER
+  end
 end
 
 require "sidekiq_alive/worker"
 require "sidekiq_alive/server"
+
+SidekiqAlive.start

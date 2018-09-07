@@ -27,11 +27,10 @@ RSpec.describe SidekiqAlive::Worker do
     end
 
     it 'requeues itself with hostname input as argument' do
-
       expect(SidekiqAlive).not_to receive(:store_alive_key)
       expect(SidekiqAlive.config).not_to receive(:callback)
       expect(described_class).to receive(:perform_async).with(hostname)
-      subject
+      subject.perform(hostname)
     end
   end
 

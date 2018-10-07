@@ -4,16 +4,13 @@ module SidekiqAlive
     sidekiq_options retry: false
 
     def perform(hostname = SidekiqAlive.hostname)
-      puts "Worker #{hostname} == #{current_hostname}"
-      return puts("[worker] returing") unless hostname_registered?(hostname)
+      return unless hostname_registered?(hostname)
       if current_hostname == hostname
         write_living_probe
         # schedule next living probe
-        puts "[worker] scheduling #{hostname} == #{current_hostname} for #{config.time_to_live / 2}"
         self.class.perform_in(config.time_to_live / 2, current_hostname)
       else
         # requeue for hostname to validate it's own liveness probe
-        puts "[worker] perform async"
         self.class.perform_async(hostname)
       end
     end

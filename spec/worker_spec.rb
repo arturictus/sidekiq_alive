@@ -1,20 +1,17 @@
 RSpec.describe SidekiqAlive::Worker do
   context 'When beeing executed in the same instance' do
     subject do
-      described_class.new.tap do |o|
-        allow(o).to receive(:hostname_registered?).and_return(true)
-        o.perform
-      end
+      described_class.new.perform
     end
 
-    it 'calls to main methods in SidekiqAlive' do
+    it 'stores alive key and requeues it self' do
+      SidekiqAlive.register_current_instance
       expect(described_class).to receive(:perform_in)
-      expect(SidekiqAlive).to receive(:store_alive_key).once
-      expect(SidekiqAlive).to receive(:register_current_instance).once
       n = 0
-      expect(SidekiqAlive.config).to receive(:callback).once.and_return(proc { n = 2 })
+      SidekiqAlive.config.callback = proc { n = 2 }
       subject
       expect(n).to eq 2
+      expect(SidekiqAlive.alive?).to be true
     end
   end
 

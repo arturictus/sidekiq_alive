@@ -1,4 +1,5 @@
 require 'rack/test'
+require 'net/http'
 RSpec.describe SidekiqAlive::Server do
   include Rack::Test::Methods
 
@@ -21,9 +22,7 @@ RSpec.describe SidekiqAlive::Server do
   end
 
   describe '.start' do
-    it 'logs the setup and then stores the alive key before supering' do
-      expect(Sidekiq::Logging.logger).to receive(:info).with(match(/Writing SidekiqAlive alive key in redis:/))
-      expect(SidekiqAlive).to receive(:store_alive_key)
+    it 'starts the server' do
       expect(Thread).to receive(:start).and_yield
       expect(described_class).to receive(:run!)
 

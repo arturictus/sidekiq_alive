@@ -20,9 +20,7 @@ module SidekiqAlive
   end
 
   def self.register_current_instance
-    redis.set(current_instance_register_key,
-              Time.now.to_i,
-              { ex: config.time_to_live.to_i + 60 })
+    register_instance(current_instance_register_key)
   end
 
   def self.registered_instances
@@ -69,8 +67,6 @@ module SidekiqAlive
     ENV['HOSTNAME'] || 'HOSTNAME_NOT_SET'
   end
 
-  ##
-
   def self.banner
     <<-BANNER.strip_heredoc
     =================== SidekiqAlive =================
@@ -93,6 +89,12 @@ module SidekiqAlive
 
       - #{registered_instances.join("\n\s\s- ")}
     BANNER
+  end
+
+  def self.register_instance(instance_name)
+    redis.set(instance_name,
+              Time.now.to_i,
+              { ex: config.time_to_live.to_i + 60 })
   end
 end
 

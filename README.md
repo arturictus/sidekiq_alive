@@ -105,7 +105,7 @@ curl localhost:7433
 ```ruby
 SidekiqAlive.setup do |config|
   # ==> Server port
-  # port to bind the server
+  # Port to bind the server
   # default: 7433
   #
   #   config.port = 7433

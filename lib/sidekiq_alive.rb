@@ -11,7 +11,7 @@ module SidekiqAlive
           sa.logger.info(banner)
           sa.register_current_instance
           sa.store_alive_key
-          sa::Worker.perform_async
+          sa::Worker.perform_async(hostname)
           sa::Server.start
           sa.logger.info(successful_startup_text)
         end
@@ -69,6 +69,7 @@ module SidekiqAlive
 
   def self.banner
     <<-BANNER.strip_heredoc
+
     =================== SidekiqAlive =================
 
     Hostname: #{hostname}
@@ -83,6 +84,7 @@ module SidekiqAlive
 
   def self.successful_startup_text
     <<-BANNER.strip_heredoc
+
     =================== SidekiqAlive Ready! =================
 
     Registered instances:

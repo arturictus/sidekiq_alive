@@ -1,5 +1,9 @@
 # SidekiqAlive
 
+[![Build Status](https://travis-ci.org/arturictus/sidekiq_alive.svg?branch=master)](https://travis-ci.org/arturictus/sidekiq_alive)
+[![Maintainability](https://api.codeclimate.com/v1/badges/35c39124564ffeb0ce4e/maintainability)](https://codeclimate.com/github/arturictus/sidekiq_alive/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/35c39124564ffeb0ce4e/test_coverage)](https://codeclimate.com/github/arturictus/sidekiq_alive/test_coverage)
+
 SidekiqAlive offers a solution to add liveness probe for a Sidekiq instance deployed in Kubernetes.
 This library can be used to check sidekiq health outside kubernetes.
 

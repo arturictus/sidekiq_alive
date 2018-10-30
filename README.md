@@ -138,6 +138,10 @@ SidekiqAlive.setup do |config|
 end
 ```
 
+`SidekiqAlive::Worker`s are enqueued into `default` queue, make sure it is included in your config file.
+
+https://github.com/mperham/sidekiq/wiki/Advanced-Options#queues
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

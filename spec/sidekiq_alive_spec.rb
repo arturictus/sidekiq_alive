@@ -48,11 +48,18 @@ RSpec.describe SidekiqAlive do
     expect(SidekiqAlive.alive?).to be true
   end
 
-  it "registered_instances" do
+  it "::registered_instances" do
     expect(SidekiqAlive.registered_instances).to eq []
     SidekiqAlive.register_current_instance
     expect(SidekiqAlive.registered_instances.count).to eq 1
     expect(SidekiqAlive.registered_instances.first).to include 'test-hostname'
+  end
+
+  it '::unregister_current_instance' do
+    SidekiqAlive.register_current_instance
+    expect(SidekiqAlive.registered_instances.count).to eq 1
+    SidekiqAlive.unregister_current_instance
+    expect(SidekiqAlive.registered_instances.count).to eq 0
   end
 
 end

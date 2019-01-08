@@ -16,11 +16,22 @@ module SidekiqAlive
           sa.logger.info(successful_startup_text)
         end
       end
+      config.on(:quiet) do
+        SidekiqAlive.unregister_current_instance
+      end
+      config.on(:shutdown) do
+        SidekiqAlive.unregister_current_instance
+      end
     end
+
   end
 
   def self.register_current_instance
     register_instance(current_instance_register_key)
+  end
+
+  def self.unregister_current_instance
+    redis.del(current_instance_register_key)
   end
 
   def self.registered_instances
@@ -84,12 +95,11 @@ module SidekiqAlive
 
   def self.successful_startup_text
     <<-BANNER.strip_heredoc
-
-    =================== SidekiqAlive Ready! =================
-
     Registered instances:
 
-      - #{registered_instances.join("\n\s\s- ")}
+    - #{registered_instances.join("\n\s\s- ")}
+
+    =================== SidekiqAlive Ready! =================
     BANNER
   end
 

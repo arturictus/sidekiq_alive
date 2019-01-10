@@ -21,6 +21,10 @@ RSpec.describe SidekiqAlive do
     expect(k.callback.call()).to eq nil
     k.callback = proc{ 'hello' }
     expect(k.callback.call()).to eq 'hello'
+
+    expect(k.preferred_queue).to eq :default
+    k.preferred_queue = :sidekiq_alive
+    expect(k.preferred_queue).to eq :sidekiq_alive
   end
 
   before do

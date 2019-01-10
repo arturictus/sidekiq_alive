@@ -6,7 +6,8 @@ module SidekiqAlive
                   :liveness_key,
                   :time_to_live,
                   :callback,
-                  :registered_instance_key
+                  :registered_instance_key,
+                  :preferred_queue
 
     def initialize
       set_defaults
@@ -18,6 +19,7 @@ module SidekiqAlive
       @time_to_live = 10 * 60
       @callback = proc {}
       @registered_instance_key = "SIDEKIQ_REGISTERED_INSTANCE"
+      @preferred_queue = :default
     end
 
   end

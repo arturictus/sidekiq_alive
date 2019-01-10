@@ -35,6 +35,26 @@ Or install it yourself as:
 
     $ gem install sidekiq_alive
 
+Run `Sidekiq` with a `sidekiq_alive` queue.
+
+```
+sidekiq -q sidekiq_alive
+```
+
+or in your config:
+
+_sidekiq.yml_
+```yaml
+queues:
+ - default
+ - sidekiq_alive
+```
+
+__IMPORTANT:__
+
+Make sure you run a `quiet` every time before you stop the pods [(issue)](https://github.com/arturictus/sidekiq_alive/issues/10). That's not only important for SidekiqAlive it's important that your jobs finish before you stop sidekiq.
+Check [recommended kubernetes setup](#kubernetes-setup)
+
 ## Usage
 
 SidekiqAlive will start when running `sidekiq` command.
@@ -135,6 +155,19 @@ SidekiqAlive.setup do |config|
   #
   #    require 'net/http'
   #    config.callback = proc { Net::HTTP.get("https://status.com/ping") }
+
+  # ==> Preferred Queue
+  # Sidekiq Alive will try to enqueue the workers to this queue. If not found
+  # will do it to the first available queue.
+  # It's a good practice to add a dedicated queue for sidekiq alive. If the queue
+  # where sidekiq is processing SidekiqALive gets overloaded and takes
+  # longer than the `ttl` to process SidekiqAlive::Worker will become the worst
+  # scenario. Sidekiq overloaded and restarting every `ttl` cicle.
+  # Add the sidekiq alive queue!!
+  #
+  # default: :sidekiq_alive
+  #
+  #    config.preferred_queue = :other
 end
 ```
 
@@ -144,6 +177,7 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 To install this gem onto your local machine, run `bundle exec rake install`.
 
+Here is a example [rails app](https://github.com/arturictus/sidekiq_alive_example) 
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/arturictus/sidekiq_alive. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.

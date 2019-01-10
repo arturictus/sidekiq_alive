@@ -11,10 +11,10 @@ __How?__
 
 A http server is started and on each requests validates that a liveness key is stored in Redis. If it is there means is working.
 
-A Sidekiq job is the responsable to storing this key. If Sidekiq stops processing jobs
+A Sidekiq worker is the responsable to storing this key. If Sidekiq stops processing workers
 this key gets expired by Redis an consequently the http server will return a 500 error.
 
-This Job is responsible to requeue itself for the next liveness probe.
+This worker is responsible to requeue itself for the next liveness probe.
 
 Each instance in kubernetes will be checked based on `ENV` variable `HOSTNAME` (kubernetes sets this for each replica/pod).
 
@@ -52,7 +52,7 @@ queues:
 
 __IMPORTANT:__
 
-Make sure you run a `quiet` every time before you stop the pods [(issue)](https://github.com/arturictus/sidekiq_alive/issues/10). That's not only important for SidekiqAlive it's important that your jobs finish before you stop sidekiq.
+Make sure you run a `quiet` every time before you stop the pods [(issue)](https://github.com/arturictus/sidekiq_alive/issues/10). That's not only important for SidekiqAlive it's important that your workers finish before you stop Sidekiq.
 Check [recommended kubernetes setup](#kubernetes-setup)
 
 ## Usage
@@ -161,10 +161,9 @@ SidekiqAlive.setup do |config|
   # will do it to the first available queue.
   # It's a good practice to add a dedicated queue for sidekiq alive. If the queue
   # where sidekiq is processing SidekiqALive gets overloaded and takes
-  # longer than the `ttl` to process SidekiqAlive::Worker will become the worst
-  # scenario. Sidekiq overloaded and restarting every `ttl` cicle.
+  # longer than the `ttl` to process SidekiqAlive::Worker will make the liveness probe
+  # to fail. Sidekiq overloaded and restarting every `ttl` cicle.
   # Add the sidekiq alive queue!!
-  #
   # default: :sidekiq_alive
   #
   #    config.preferred_queue = :other
@@ -177,7 +176,8 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 To install this gem onto your local machine, run `bundle exec rake install`.
 
-Here is a example [rails app](https://github.com/arturictus/sidekiq_alive_example) 
+Here is a example [rails app](https://github.com/arturictus/sidekiq_alive_example)
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/arturictus/sidekiq_alive. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.

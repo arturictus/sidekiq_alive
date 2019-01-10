@@ -19,7 +19,7 @@ module SidekiqAlive
       @time_to_live = 10 * 60
       @callback = proc {}
       @registered_instance_key = "SIDEKIQ_REGISTERED_INSTANCE"
-      @preferred_queue = :default
+      @preferred_queue = :sidekiq_alive
     end
 
   end

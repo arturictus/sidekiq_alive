@@ -4,11 +4,6 @@ module SidekiqAlive
     sidekiq_options retry: false
 
     def perform(hostname = SidekiqAlive.hostname)
-      puts hostname
-      puts current_hostname
-      puts "hostname_registered: #{hostname_registered?(hostname)}"
-      puts "registered_instances:"
-      puts SidekiqAlive.registered_instances
       return unless hostname_registered?(hostname)
       if current_hostname == hostname
         write_living_probe

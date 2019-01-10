@@ -19,6 +19,7 @@ module SidekiqAlive
           sa.logger.info(successful_startup_text)
         end
       end
+
       config.on(:quiet) do
         SidekiqAlive.unregister_current_instance
       end
@@ -30,8 +31,8 @@ module SidekiqAlive
   end
 
   def self.select_queue(queues)
-    @queue = if queues.include?(:default)
-               :default
+    @queue = if queues.find { |e| e.to_sym == config.preferred_queue.to_sym }
+               config.preferred_queue.to_sym
              else
                queues.first
              end

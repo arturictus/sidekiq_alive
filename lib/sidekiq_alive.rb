@@ -6,6 +6,9 @@ require "sidekiq_alive/config"
 module SidekiqAlive
   def self.start
     Sidekiq.configure_server do |config|
+
+      SidekiqAlive::Worker.sidekiq_options queue: SidekiqAlive.select_queue(config.options[:queues])
+
       config.on(:startup) do
         SidekiqAlive.tap do |sa|
           sa.logger.info(banner)
@@ -16,6 +19,7 @@ module SidekiqAlive
           sa.logger.info(successful_startup_text)
         end
       end
+
       config.on(:quiet) do
         SidekiqAlive.unregister_current_instance
       end
@@ -24,6 +28,14 @@ module SidekiqAlive
       end
     end
 
+  end
+
+  def self.select_queue(queues)
+    @queue = if queues.find { |e| e.to_sym == config.preferred_queue.to_sym }
+               config.preferred_queue.to_sym
+             else
+               queues.first
+             end
   end
 
   def self.register_current_instance
@@ -88,6 +100,8 @@ module SidekiqAlive
     Port: #{config.port}
     Time to live: #{config.time_to_live}s
     Current instance register key: #{current_instance_register_key}
+    Worker running on queue: #{@queue}
+
 
     starting ...
     BANNER

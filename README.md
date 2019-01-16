@@ -176,7 +176,7 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 To install this gem onto your local machine, run `bundle exec rake install`.
 
-Here is a example [rails app](https://github.com/arturictus/sidekiq_alive_example)
+Here is an example [rails app](https://github.com/arturictus/sidekiq_alive_example)
 
 ## Contributing
 

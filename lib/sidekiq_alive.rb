@@ -1,7 +1,8 @@
-require "sidekiq"
-require "singleton"
-require "sidekiq_alive/version"
-require "sidekiq_alive/config"
+require 'sidekiq'
+require 'sidekiq/api'
+require 'singleton'
+require 'sidekiq_alive/version'
+require 'sidekiq_alive/config'
 
 module SidekiqAlive
   def self.start

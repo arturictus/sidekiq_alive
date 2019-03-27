@@ -43,11 +43,19 @@ module SidekiqAlive
   end
 
   def self.unregister_current_instance
+    # Delete any pending jobs for this instance
+    purge_pending_jobs
     redis.del(current_instance_register_key)
   end
 
   def self.registered_instances
     redis.keys("#{config.registered_instance_key}::*")
+  end
+
+  def purge_pending_jobs
+    scheduled_set = Sidekiq::ScheduledSet.new
+    jobs = scheduled_set.select { |job| job.klass == 'SidekiqAlive::Worker' && job.args[0] == hostname }
+    jobs.each(&:delete)
   end
 
   def self.current_instance_register_key
@@ -120,7 +128,7 @@ module SidekiqAlive
   def self.register_instance(instance_name)
     redis.set(instance_name,
               Time.now.to_i,
-              { ex: config.time_to_live.to_i + 60 })
+              { ex: config.registration_ttl.to_i })
   end
 end
 

@@ -12,6 +12,7 @@ module SidekiqAlive
       else
         # requeue for hostname to validate it's own liveness probe
         self.class.perform_async(hostname)
+        sleep(config.delay_between_async_other_host_queue)
       end
     end
 

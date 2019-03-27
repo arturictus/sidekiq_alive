@@ -52,7 +52,7 @@ module SidekiqAlive
     redis.keys("#{config.registered_instance_key}::*")
   end
 
-  def purge_pending_jobs
+  def self.purge_pending_jobs
     scheduled_set = Sidekiq::ScheduledSet.new
     jobs = scheduled_set.select { |job| job.klass == 'SidekiqAlive::Worker' && job.args[0] == hostname }
     jobs.each(&:delete)

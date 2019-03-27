@@ -14,7 +14,7 @@ RSpec.describe SidekiqAlive do
     k.liveness_key = 'key'
     expect(k.liveness_key).to eq 'key'
 
-    expect(k.time_to_live).to eq 10 * 60
+    expect(k.time_to_live).to eq 5 * 60
     k.time_to_live = 2 * 60
     expect(k.time_to_live).to eq 2 * 60
 

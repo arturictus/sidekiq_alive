@@ -43,7 +43,7 @@ module SidekiqAlive
 
   def self.unregister_current_instance
     # Delete any pending jobs for this instance
-    sa.logger.info(shutdown_info)
+    logger.info(shutdown_info)
     purge_pending_jobs
     redis.del(current_instance_register_key)
   end
@@ -55,7 +55,7 @@ module SidekiqAlive
   def self.purge_pending_jobs
     scheduled_set = Sidekiq::ScheduledSet.new
     jobs = scheduled_set.select { |job| job.klass == 'SidekiqAlive::Worker' && job.args[0] == hostname }
-    sa.logger.info("Purging #{jobs.count} pending for #{hostname}")
+    logger.info("Purging #{jobs.count} pending for #{hostname}")
     jobs.each(&:delete)
   end
 

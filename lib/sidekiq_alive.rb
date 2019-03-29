@@ -100,7 +100,7 @@ module SidekiqAlive
   end
 
   def self.shutdown_info
-    <<-SHUTDOWNBANNER.strip_heredoc
+    <<-BANNER.strip_heredoc
 
     =================== Shutting down SidekiqAlive =================
 
@@ -108,7 +108,7 @@ module SidekiqAlive
     Liveness key: #{current_lifeness_key}
     Current instance register key: #{current_instance_register_key}
 
-    SHUTDOWNBANNER
+    BANNER
   end
 
   def self.banner

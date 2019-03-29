@@ -100,7 +100,7 @@ module SidekiqAlive
   end
 
   def self.shutdown_info
-    <<-BANNER.strip_heredoc
+    <<~BANNER
 
     =================== Shutting down SidekiqAlive =================
 
@@ -112,7 +112,7 @@ module SidekiqAlive
   end
 
   def self.banner
-    <<-BANNER.strip_heredoc
+    <<~BANNER
 
     =================== SidekiqAlive =================
 
@@ -129,7 +129,7 @@ module SidekiqAlive
   end
 
   def self.successful_startup_text
-    <<-BANNER.strip_heredoc
+    <<~BANNER
     Registered instances:
 
     - #{registered_instances.join("\n\s\s- ")}

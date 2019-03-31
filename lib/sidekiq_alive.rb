@@ -15,7 +15,9 @@ module SidekiqAlive
           sa.register_current_instance
           sa.store_alive_key
           sa::Worker.perform_async(hostname)
-          sa::Server.start
+          @server_pid = fork do
+            sa::Server.run!
+          end
           sa.logger.info(successful_startup_text)
         end
       end
@@ -24,6 +26,8 @@ module SidekiqAlive
         SidekiqAlive.unregister_current_instance
       end
       config.on(:shutdown) do
+        Process.kill('TERM', @server_pid) unless @server_pid.nil?
+        Process.wait(@server_pid) unless @server_pid.nil?
         SidekiqAlive.unregister_current_instance
       end
     end

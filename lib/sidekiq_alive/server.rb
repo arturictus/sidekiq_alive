@@ -1,5 +1,4 @@
 require 'sinatra/base'
-require_relative './config'
 module SidekiqAlive
   class Server < Sinatra::Base
     set :bind, '0.0.0.0'

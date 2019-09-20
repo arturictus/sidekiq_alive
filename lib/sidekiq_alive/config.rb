@@ -21,7 +21,7 @@ module SidekiqAlive
       @callback = proc {}
       @registered_instance_key = 'SIDEKIQ_REGISTERED_INSTANCE'
       @preferred_queue = :sidekiq_alive
-      @delay_between_async_other_host_queue = false
+      @delay_between_async_other_host_queue = 1
     end
 
     def registration_ttl

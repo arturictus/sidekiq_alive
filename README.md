@@ -173,9 +173,11 @@ SidekiqAlive.setup do |config|
   # until the owner instance process it. This was causing a lot of read/writes in big deployments 
   # with a lot of replicas.
   # Delaying the requeue proves to be less read/write intensive
-  # default: false
+  # default: 1
   #
   #    config.delay_between_async_other_host_queue = 0.5
+  #    #or 
+  #    config.delay_between_async_other_host_queue = false
 end
 ```
 

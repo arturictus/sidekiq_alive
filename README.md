@@ -167,6 +167,30 @@ SidekiqAlive.setup do |config|
   # default: :sidekiq_alive
   #
   #    config.preferred_queue = :other
+
+  # ==> server
+  # Set your preferred server for sinatra 
+  # default: :thin
+  #
+  #    config.server = :puma
+
+  # ==> registration_ttl
+  # When new replica is launched this host gets registered in redis
+  # If a job worker receives a not registered host it just skips the job an 
+  # does not requeu itself and does not marks this instance as alive.
+  # fine tune here how long do you want the ttl for the host.
+  # default: config.time_to_live + 60
+  #
+  #    config.registration_ttl = (10 * 60) + 60
+
+  # ==> delay_between_async_other_host_queue
+  # When instance receives a job from another instance it requeues itself again 
+  # until the owner instance process it. This was causing a lot of read/writes in big deployments 
+  # with a lot of replicas.
+  # Delaying the requeue proves to be less read/write intensive
+  # default: 1 #second
+  #
+  #    config.delay_between_async_other_host_queue = 0.5
 end
 ```
 

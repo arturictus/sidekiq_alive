@@ -75,7 +75,7 @@ module SidekiqAlive
   end
 
   def self.logger
-    Sidekiq::Logging.logger
+    Sidekiq.logger
   end
 
   def self.config

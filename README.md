@@ -168,15 +168,6 @@ SidekiqAlive.setup do |config|
   #
   #    config.preferred_queue = :other
 
-  # ==> registration_ttl
-  # When new replica is launched this host gets registered in redis
-  # If a job worker receives a not registered host it just skips the job an 
-  # does not requeu itself and does not marks this instance as alive.
-  # fine tune here how long do you want the ttl for the host.
-  # default: config.time_to_live + 60
-  #
-  #    config.registration_ttl = (10 * 60) + 60
-
   # ==> delay_between_async_other_host_queue
   # When instance receives a job from another instance it requeues itself again 
   # until the owner instance process it. This was causing a lot of read/writes in big deployments 

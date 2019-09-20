@@ -9,7 +9,6 @@ module SidekiqAlive
                   :registered_instance_key,
                   :preferred_queue,
                   :delay_between_async_other_host_queue
-    attr_writer :registration_ttl
 
     def initialize
       set_defaults

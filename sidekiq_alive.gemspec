@@ -38,5 +38,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "mock_redis"
   spec.add_dependency "sidekiq"
   spec.add_dependency "sinatra"
-  spec.add_dependency "thin"
 end

@@ -168,12 +168,6 @@ SidekiqAlive.setup do |config|
   #
   #    config.preferred_queue = :other
 
-  # ==> server
-  # Set your preferred server for sinatra 
-  # default: :thin
-  #
-  #    config.server = :puma
-
   # ==> registration_ttl
   # When new replica is launched this host gets registered in redis
   # If a job worker receives a not registered host it just skips the job an 

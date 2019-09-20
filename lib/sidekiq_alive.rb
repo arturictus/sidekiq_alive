@@ -7,7 +7,8 @@ module SidekiqAlive
   def self.start
     Sidekiq.configure_server do |config|
 
-      SidekiqAlive::Worker.sidekiq_options queue: SidekiqAlive.select_queue(config.options[:queues])
+      SidekiqAlive::Worker.sidekiq_options queue: current_queue
+      config.options[:queues] << current_queue
 
       config.on(:startup) do
         SidekiqAlive.tap do |sa|
@@ -28,6 +29,10 @@ module SidekiqAlive
       end
     end
 
+  end
+
+  def self.current_queue
+    "new_queue-#{hostname}"
   end
 
   def self.select_queue(queues)

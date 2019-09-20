@@ -5,6 +5,7 @@ module SidekiqAlive
 
     def perform(hostname = SidekiqAlive.hostname)
       return unless hostname_registered?(hostname)
+      sleep 10
       if current_hostname == hostname
         write_living_probe
         # schedule next living probe

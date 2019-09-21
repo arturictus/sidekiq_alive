@@ -20,13 +20,4 @@ RSpec.describe SidekiqAlive::Server do
       expect(last_response.body).to eq("Can't find the alive key")
     end
   end
-
-  describe '.start' do
-    it 'starts the server' do
-      expect(Thread).to receive(:start).and_yield
-      expect(described_class).to receive(:run!)
-
-      described_class.start
-    end
-  end
 end

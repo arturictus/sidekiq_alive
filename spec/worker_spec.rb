@@ -23,9 +23,17 @@ RSpec.describe SidekiqAlive::Worker do
       end
     end
 
-    it 'requeues itself with hostname input as argument' do
+    it 'schedules itself with hostname input as argument' do
       expect(SidekiqAlive).not_to receive(:store_alive_key)
       expect(SidekiqAlive.config).not_to receive(:callback)
+      allow(SidekiqAlive.config).to receive(:delay_between_async_other_host_queue).and_return(1)
+      expect(described_class).to receive(:perform_in).with(SidekiqAlive.config.delay_between_async_other_host_queue, hostname)
+      subject.perform(hostname)
+    end
+    it 'request itself with hostname input as argument' do
+      expect(SidekiqAlive).not_to receive(:store_alive_key)
+      expect(SidekiqAlive.config).not_to receive(:callback)
+      allow(SidekiqAlive.config).to receive(:delay_between_async_other_host_queue).and_return(false)
       expect(described_class).to receive(:perform_async).with(hostname)
       subject.perform(hostname)
     end

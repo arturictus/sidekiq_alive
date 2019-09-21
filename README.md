@@ -167,6 +167,17 @@ SidekiqAlive.setup do |config|
   # default: :sidekiq_alive
   #
   #    config.preferred_queue = :other
+
+  # ==> delay_between_async_other_host_queue
+  # When instance receives a job from another instance it requeues itself again 
+  # until the owner instance process it. This was causing a lot of read/writes in big deployments 
+  # with a lot of replicas.
+  # Delaying the requeue proves to be less read/write intensive
+  # default: 1
+  #
+  #    config.delay_between_async_other_host_queue = 0.5
+  #    #or 
+  #    config.delay_between_async_other_host_queue = false
 end
 ```
 

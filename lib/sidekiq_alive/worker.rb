@@ -12,7 +12,11 @@ module SidekiqAlive
         self.class.perform_in(config.time_to_live / 2, current_hostname)
       else
         # requeue for hostname to validate it's own liveness probe
-        self.class.perform_async(hostname)
+        if config.delay_between_async_other_host_queue
+          self.class.perform_in(config.delay_between_async_other_host_queue, hostname)
+        else
+          self.class.perform_async(hostname)
+        end
       end
     end
 

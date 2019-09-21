@@ -1,38 +1,42 @@
-require "sidekiq"
-require "singleton"
-require "sidekiq_alive/version"
-require "sidekiq_alive/config"
+require 'sidekiq'
+require 'sidekiq/api'
+require 'singleton'
+require 'sidekiq_alive/version'
+require 'sidekiq_alive/config'
 
 module SidekiqAlive
   def self.start
-    Sidekiq.configure_server do |config|
+    Sidekiq.configure_server do |sq_config|
 
       SidekiqAlive::Worker.sidekiq_options queue: current_queue
-      config.options[:queues] << current_queue
+      sq_config.options[:queues] << current_queue
 
-      config.on(:startup) do
+      sq_config.on(:startup) do
         SidekiqAlive.tap do |sa|
           sa.logger.info(banner)
           sa.register_current_instance
           sa.store_alive_key
           sa::Worker.perform_async(hostname)
-          sa::Server.start
+          @server_pid = fork do
+            sa::Server.run!
+          end
           sa.logger.info(successful_startup_text)
         end
       end
 
-      config.on(:quiet) do
+      sq_config.on(:quiet) do
         SidekiqAlive.unregister_current_instance
       end
-      config.on(:shutdown) do
+      sq_config.on(:shutdown) do
+        Process.kill('TERM', @server_pid) unless @server_pid.nil?
+        Process.wait(@server_pid) unless @server_pid.nil?
         SidekiqAlive.unregister_current_instance
       end
     end
-
   end
 
   def self.current_queue
-    "new_queue-#{hostname}"
+    "#{config.preferred_queue}-#{hostname}"
   end
 
   def self.select_queue(queues)
@@ -48,11 +52,21 @@ module SidekiqAlive
   end
 
   def self.unregister_current_instance
+    # Delete any pending jobs for this instance
+    logger.info(shutdown_info)
+    purge_pending_jobs
     redis.del(current_instance_register_key)
   end
 
   def self.registered_instances
     redis.keys("#{config.registered_instance_key}::*")
+  end
+
+  def self.purge_pending_jobs
+    scheduled_set = Sidekiq::ScheduledSet.new
+    jobs = scheduled_set.select { |job| job.klass == 'SidekiqAlive::Worker' && job.args[0] == hostname }
+    logger.info("Purging #{jobs.count} pending for #{hostname}")
+    jobs.each(&:delete)
   end
 
   def self.current_instance_register_key
@@ -62,7 +76,7 @@ module SidekiqAlive
   def self.store_alive_key
     redis.set(current_lifeness_key,
               Time.now.to_i,
-              { ex: config.time_to_live.to_i })
+              ex: config.time_to_live.to_i)
   end
 
   def self.redis
@@ -70,7 +84,7 @@ module SidekiqAlive
   end
 
   def self.alive?
-    redis.ttl(current_lifeness_key) == -2 ? false : true
+    redis.ttl(current_lifeness_key) != -2
   end
 
   # CONFIG ---------------------------------------
@@ -80,7 +94,7 @@ module SidekiqAlive
   end
 
   def self.logger
-    Sidekiq::Logging.logger
+    Sidekiq.logger
   end
 
   def self.config
@@ -95,8 +109,20 @@ module SidekiqAlive
     ENV['HOSTNAME'] || 'HOSTNAME_NOT_SET'
   end
 
+  def self.shutdown_info
+    <<~BANNER
+
+    =================== Shutting down SidekiqAlive =================
+
+    Hostname: #{hostname}
+    Liveness key: #{current_lifeness_key}
+    Current instance register key: #{current_instance_register_key}
+
+    BANNER
+  end
+
   def self.banner
-    <<-BANNER.strip_heredoc
+    <<~BANNER
 
     =================== SidekiqAlive =================
 
@@ -113,7 +139,7 @@ module SidekiqAlive
   end
 
   def self.successful_startup_text
-    <<-BANNER.strip_heredoc
+    <<~BANNER
     Registered instances:
 
     - #{registered_instances.join("\n\s\s- ")}
@@ -125,11 +151,11 @@ module SidekiqAlive
   def self.register_instance(instance_name)
     redis.set(instance_name,
               Time.now.to_i,
-              { ex: config.time_to_live.to_i + 60 })
+              ex: config.registration_ttl.to_i)
   end
 end
 
-require "sidekiq_alive/worker"
-require "sidekiq_alive/server"
+require 'sidekiq_alive/worker'
+require 'sidekiq_alive/server'
 
 SidekiqAlive.start unless ENV['DISABLE_SIDEKIQ_ALIVE']

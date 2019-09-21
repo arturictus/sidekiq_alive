@@ -5,9 +5,13 @@ cache: bundler
 rvm:
   - 2.3.7
   - 2.4.4
-  - 2.5.1
+  - 2.5.5
+  - 2.6.2
   - ruby-head
-before_install: gem install bundler -v 1.16.1
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+before_install: gem install bundler -v 1.17.3
 env:
   global:
     - CC_TEST_REPORTER_ID=571b470a2b61f8a58b2a0ebbcf297805efa07c548e45bac9d1c9ce0c5edcfc20

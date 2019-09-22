@@ -63,7 +63,7 @@ module SidekiqAlive
     logger.info("[SidekiqAlive] Purging #{jobs.count} pending for #{hostname}")
     jobs.each(&:delete)
     logger.info("[SidekiqAlive] Removing queue #{current_queue}")
-    Sidekiq::Queue.new(current_queue)
+    Sidekiq::Queue.new(current_queue).clear
   end
 
   def self.current_instance_register_key

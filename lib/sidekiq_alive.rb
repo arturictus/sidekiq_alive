@@ -6,9 +6,9 @@ require 'sidekiq_alive/config'
 
 module SidekiqAlive
   def self.start
+    SidekiqAlive::Worker.sidekiq_options queue: current_queue
     Sidekiq.configure_server do |sq_config|
 
-      SidekiqAlive::Worker.sidekiq_options queue: current_queue
       sq_config.options[:queues] << current_queue
 
       sq_config.on(:startup) do
@@ -36,15 +36,7 @@ module SidekiqAlive
   end
 
   def self.current_queue
-    "#{config.preferred_queue}-#{hostname}"
-  end
-
-  def self.select_queue(queues)
-    @queue = if queues.find { |e| e.to_sym == config.preferred_queue.to_sym }
-               config.preferred_queue.to_sym
-             else
-               queues.first
-             end
+    "#{config.queue_prefix}-#{hostname}"
   end
 
   def self.register_current_instance
@@ -64,9 +56,11 @@ module SidekiqAlive
 
   def self.purge_pending_jobs
     scheduled_set = Sidekiq::ScheduledSet.new
-    jobs = scheduled_set.select { |job| job.klass == 'SidekiqAlive::Worker' && job.args[0] == hostname }
+    jobs = scheduled_set.select { |job| job.klass == 'SidekiqAlive::Worker' && job.queue == current_queue }
     logger.info("Purging #{jobs.count} pending for #{hostname}")
     jobs.each(&:delete)
+    logger.info("Removing all queue #{current_queue}")
+    Sidekiq::Queue.new(current_queue)
   end
 
   def self.current_instance_register_key

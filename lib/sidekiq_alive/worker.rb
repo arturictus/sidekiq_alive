@@ -4,20 +4,9 @@ module SidekiqAlive
     sidekiq_options retry: false
 
     def perform(hostname = SidekiqAlive.hostname)
-      return unless hostname_registered?(hostname)
-      sleep 10
-      if current_hostname == hostname
-        write_living_probe
-        # schedule next living probe
-        self.class.perform_in(config.time_to_live / 2, current_hostname)
-      else
-        # requeue for hostname to validate it's own liveness probe
-        if config.delay_between_async_other_host_queue
-          self.class.perform_in(config.delay_between_async_other_host_queue, hostname)
-        else
-          self.class.perform_async(hostname)
-        end
-      end
+      write_living_probe
+      # schedule next living probe
+      self.class.perform_in(config.time_to_live / 2, current_hostname)
     end
 
     def hostname_registered?(hostname)
@@ -32,7 +21,7 @@ module SidekiqAlive
       # Increment ttl for current registered instance
       SidekiqAlive.register_current_instance
       # after callbacks
-      config.callback.call()
+      config.callback.call() rescue nil
     end
 
     def current_hostname

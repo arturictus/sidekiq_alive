@@ -7,8 +7,7 @@ module SidekiqAlive
                   :time_to_live,
                   :callback,
                   :registered_instance_key,
-                  :preferred_queue,
-                  :delay_between_async_other_host_queue
+                  :queue_prefix
 
     def initialize
       set_defaults
@@ -20,8 +19,7 @@ module SidekiqAlive
       @time_to_live = 10 * 60
       @callback = proc {}
       @registered_instance_key = 'SIDEKIQ_REGISTERED_INSTANCE'
-      @preferred_queue = :sidekiq_alive
-      @delay_between_async_other_host_queue = 1
+      @queue_prefix = :sidekiq_alive
     end
 
     def registration_ttl

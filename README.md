@@ -18,6 +18,23 @@ This worker is responsible to requeue itself for the next liveness probe.
 
 Each instance in kubernetes will be checked based on `ENV` variable `HOSTNAME` (kubernetes sets this for each replica/pod).
 
+On initialization SidekiqAlive will asign to Sidekiq::Worker a queue with the current host and add this queue to the current instance queues to process.
+
+example:
+
+```
+hostname: foo
+  Worker queue: sidekiq_alive-foo
+  instance queues:
+   - sidekiq_alive-foo
+   *- your queues
+
+hostname: bar
+  Worker queue: sidekiq_alive-bar
+  instance queues:
+   - sidekiq_alive-bar
+   *- your queues
+```
 
 ## Installation
 
@@ -35,29 +52,21 @@ Or install it yourself as:
 
     $ gem install sidekiq_alive
 
-Run `Sidekiq` with a `sidekiq_alive` queue.
-
-```
-sidekiq -q sidekiq_alive
-```
-
-or in your config:
-
-_sidekiq.yml_
-```yaml
-queues:
- - default
- - sidekiq_alive
-```
-
-__IMPORTANT:__
-
-Make sure you run a `quiet` every time before you stop the pods [(issue)](https://github.com/arturictus/sidekiq_alive/issues/10). That's not only important for SidekiqAlive it's important that your workers finish before you stop Sidekiq.
-Check [recommended kubernetes setup](#kubernetes-setup)
 
 ## Usage
 
 SidekiqAlive will start when running `sidekiq` command.
+
+Run `Sidekiq`
+
+```
+bundle exec sidekiq
+```
+
+```
+curl localhost:7433
+#=> Alive!                                   
+```
 
 
 __how to disable?__
@@ -156,28 +165,14 @@ SidekiqAlive.setup do |config|
   #    require 'net/http'
   #    config.callback = proc { Net::HTTP.get("https://status.com/ping") }
 
-  # ==> Preferred Queue
-  # Sidekiq Alive will try to enqueue the workers to this queue. If not found
-  # will do it to the first available queue.
-  # It's a good practice to add a dedicated queue for sidekiq alive. If the queue
-  # where sidekiq is processing SidekiqALive gets overloaded and takes
-  # longer than the `ttl` to process SidekiqAlive::Worker will make the liveness probe
-  # to fail. Sidekiq overloaded and restarting every `ttl` cicle.
-  # Add the sidekiq alive queue!!
+  # ==> Queue Prefix
+  # SidekiqAlive will run in a independent queue for each instance/replica
+  # This queue name will be generated with: "#{queue_prefix}-#{hostname}.
+  # You can customize the prefix here. 
   # default: :sidekiq_alive
   #
-  #    config.preferred_queue = :other
+  #    config.queue_prefix = :other
 
-  # ==> delay_between_async_other_host_queue
-  # When instance receives a job from another instance it requeues itself again 
-  # until the owner instance process it. This was causing a lot of read/writes in big deployments 
-  # with a lot of replicas.
-  # Delaying the requeue proves to be less read/write intensive
-  # default: 1
-  #
-  #    config.delay_between_async_other_host_queue = 0.5
-  #    #or 
-  #    config.delay_between_async_other_host_queue = false
 end
 ```
 

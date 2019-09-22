@@ -6,10 +6,12 @@ require 'sidekiq_alive/config'
 
 module SidekiqAlive
   def self.start
-    Sidekiq.configure_server do |config|
-      SidekiqAlive::Worker.sidekiq_options queue: SidekiqAlive.select_queue(config.options[:queues])
+    SidekiqAlive::Worker.sidekiq_options queue: current_queue
+    Sidekiq.configure_server do |sq_config|
 
-      config.on(:startup) do
+      sq_config.options[:queues] << current_queue
+
+      sq_config.on(:startup) do
         SidekiqAlive.tap do |sa|
           sa.logger.info(banner)
           sa.register_current_instance
@@ -22,10 +24,10 @@ module SidekiqAlive
         end
       end
 
-      config.on(:quiet) do
+      sq_config.on(:quiet) do
         SidekiqAlive.unregister_current_instance
       end
-      config.on(:shutdown) do
+      sq_config.on(:shutdown) do
         Process.kill('TERM', @server_pid) unless @server_pid.nil?
         Process.wait(@server_pid) unless @server_pid.nil?
         SidekiqAlive.unregister_current_instance
@@ -33,12 +35,8 @@ module SidekiqAlive
     end
   end
 
-  def self.select_queue(queues)
-    @queue = if queues.find { |e| e.to_sym == config.preferred_queue.to_sym }
-               config.preferred_queue.to_sym
-             else
-               queues.first
-             end
+  def self.current_queue
+    "#{config.queue_prefix}-#{hostname}"
   end
 
   def self.register_current_instance
@@ -57,10 +55,15 @@ module SidekiqAlive
   end
 
   def self.purge_pending_jobs
+    # TODO:
+    # Sidekiq 6 allows better way to find scheduled jobs:
+    # https://github.com/mperham/sidekiq/wiki/API#scan
     scheduled_set = Sidekiq::ScheduledSet.new
-    jobs = scheduled_set.select { |job| job.klass == 'SidekiqAlive::Worker' && job.args[0] == hostname }
-    logger.info("Purging #{jobs.count} pending for #{hostname}")
+    jobs = scheduled_set.select { |job| job.klass == 'SidekiqAlive::Worker' && job.queue == current_queue }
+    logger.info("[SidekiqAlive] Purging #{jobs.count} pending for #{hostname}")
     jobs.each(&:delete)
+    logger.info("[SidekiqAlive] Removing queue #{current_queue}")
+    Sidekiq::Queue.new(current_queue).clear
   end
 
   def self.current_instance_register_key

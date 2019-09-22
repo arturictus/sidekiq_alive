@@ -18,6 +18,23 @@ This worker is responsible to requeue itself for the next liveness probe.
 
 Each instance in kubernetes will be checked based on `ENV` variable `HOSTNAME` (kubernetes sets this for each replica/pod).
 
+On initialization SidekiqAlive will asign to Sidekiq::Worker a queue with the current host and add this queue to the current instance queues to process.
+
+example:
+
+```
+hostname: foo
+  Worker queue: sidekiq_alive-foo
+  instance queues:
+   - sidekiq_alive-foo
+   *- your queues
+
+hostname: bar
+  Worker queue: sidekiq_alive-bar
+  instance queues:
+   - sidekiq_alive-bar
+   *- your queues
+```
 
 ## Installation
 
@@ -34,7 +51,7 @@ And then execute:
 Or install it yourself as:
 
     $ gem install sidekiq_alive
-    
+
 
 ## Usage
 

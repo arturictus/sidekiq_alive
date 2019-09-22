@@ -55,11 +55,14 @@ module SidekiqAlive
   end
 
   def self.purge_pending_jobs
+    # TODO:
+    # Sidekiq 6 allows better way to find scheduled jobs:
+    # https://github.com/mperham/sidekiq/wiki/API#scan
     scheduled_set = Sidekiq::ScheduledSet.new
     jobs = scheduled_set.select { |job| job.klass == 'SidekiqAlive::Worker' && job.queue == current_queue }
-    logger.info("Purging #{jobs.count} pending for #{hostname}")
+    logger.info("[SidekiqAlive] Purging #{jobs.count} pending for #{hostname}")
     jobs.each(&:delete)
-    logger.info("Removing all queue #{current_queue}")
+    logger.info("[SidekiqAlive] Removing queue #{current_queue}")
     Sidekiq::Queue.new(current_queue)
   end
 

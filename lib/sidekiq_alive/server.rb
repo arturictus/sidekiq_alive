@@ -2,7 +2,7 @@ require 'sinatra/base'
 module SidekiqAlive
   class Server < Sinatra::Base
     set :bind, '0.0.0.0'
-    set :port, SidekiqAlive.config.port
+    set :port, -> { SidekiqAlive.config.port }
 
     get '/' do
       if SidekiqAlive.alive?

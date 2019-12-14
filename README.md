@@ -11,7 +11,7 @@ __How?__
 
 A http server is started and on each requests validates that a liveness key is stored in Redis. If it is there means is working.
 
-A Sidekiq worker is the responsable to storing this key. If Sidekiq stops processing workers
+A Sidekiq worker is the responsible to storing this key. If Sidekiq stops processing workers
 this key gets expired by Redis an consequently the http server will return a 500 error.
 
 This worker is responsible to requeue itself for the next liveness probe.

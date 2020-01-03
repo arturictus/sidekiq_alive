@@ -83,6 +83,8 @@ Set `livenessProbe` in your Kubernetes deployment
 
 example with recommended setup:
 
+#### Sidekiq < 6
+
 ```yaml
 spec:
   containers:
@@ -114,6 +116,63 @@ spec:
           exec:
             # SIGTERM triggers a quick exit; gracefully terminate instead
             command: ["bundle", "exec", "sidekiqctl", "quiet"]
+  terminationGracePeriodSeconds: 60 # put your longest Job time here plus security time.
+```
+
+#### Sidekiq >= 6
+
+Create file:
+
+__kube/sidekiq_quiet__
+
+```bash
+#!/bin/bash
+
+# Find Pid
+SIDEKIQ_PID=$(ps aux | grep sidekiq | grep busy | awk '{ print $2 }')
+# Send TSTP signal
+kill -SIGTSTP $SIDEKIQ_PID
+```
+
+Make it executable:
+
+```
+$ chmod +x kube/sidekiq_quiet
+```
+
+Execute it in your deployment preStop:
+
+```yaml
+spec:
+  containers:
+    - name: my_app
+      image: my_app:latest
+      env:
+        - name: RAILS_ENV
+          value: production
+      command:
+        - bundle
+        - exec
+        - sidekiq
+      ports:
+        - containerPort: 7433
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 7433
+        initialDelaySeconds: 80 # app specific. Time your sidekiq takes to start processing.
+        timeoutSeconds: 5 # can be much less
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 7433
+        initialDelaySeconds: 80 # app specific
+        timeoutSeconds: 5 # can be much less
+      lifecycle:
+        preStop:
+          exec:
+            # SIGTERM triggers a quick exit; gracefully terminate instead
+            command: ["kube", "sidekiq_quiet"]
   terminationGracePeriodSeconds: 60 # put your longest Job time here plus security time.
 ```
 

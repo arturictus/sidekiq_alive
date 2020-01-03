@@ -20,4 +20,20 @@ RSpec.describe SidekiqAlive::Server do
       expect(last_response.body).to eq("Can't find the alive key")
     end
   end
+
+  describe 'SidekiqAlive setup' do
+    before do
+      ENV['SIDEKIQ_ALIVE_PORT'] = '4567'
+      SidekiqAlive.config.set_defaults
+    end
+
+    after do
+      ENV['SIDEKIQ_ALIVE_PORT'] = nil
+    end
+
+    it 'respects the SIDEKIQ_ALIVE_PORT environment variable' do
+      expect( described_class.port ).to eq '4567'
+    end
+  end
+
 end

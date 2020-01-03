@@ -123,7 +123,7 @@ spec:
 
 Create file:
 
-__kube/sidekiq_quiet__
+_kube/sidekiq_quiet_
 
 ```bash
 #!/bin/bash
@@ -172,7 +172,7 @@ spec:
         preStop:
           exec:
             # SIGTERM triggers a quick exit; gracefully terminate instead
-            command: ["kube", "sidekiq_quiet"]
+            command: ["kube/sidekiq_quiet"]
   terminationGracePeriodSeconds: 60 # put your longest Job time here plus security time.
 ```
 

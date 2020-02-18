@@ -3,6 +3,7 @@ module SidekiqAlive
     include Singleton
 
     attr_accessor :port,
+                  :url,
                   :liveness_key,
                   :time_to_live,
                   :callback,
@@ -15,6 +16,7 @@ module SidekiqAlive
 
     def set_defaults
       @port = ENV['SIDEKIQ_ALIVE_PORT'] || 7433
+      @url = ENV['SIDEKIQ_ALIVE_URL'] || '/'
       @liveness_key = 'SIDEKIQ::LIVENESS_PROBE_TIMESTAMP'
       @time_to_live = 10 * 60
       @callback = proc {}

@@ -3,8 +3,9 @@ module SidekiqAlive
   class Server < Sinatra::Base
     set :bind, '0.0.0.0'
     set :port, -> { SidekiqAlive.config.port }
+    set :url, -> { SidekiqAlive.config.url }
 
-    get '/' do
+    get settings.url do
       if SidekiqAlive.alive?
         status 200
         body 'Alive!'

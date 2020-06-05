@@ -25,6 +25,7 @@ RSpec.describe SidekiqAlive::Server do
     before do
       ENV['SIDEKIQ_ALIVE_PORT'] = '4567'
       SidekiqAlive.config.set_defaults
+      SidekiqAlive.config.server = 'puma'
     end
 
     after do
@@ -32,8 +33,11 @@ RSpec.describe SidekiqAlive::Server do
     end
 
     it 'respects the SIDEKIQ_ALIVE_PORT environment variable' do
-      expect( described_class.port ).to eq '4567'
+      expect(described_class.port).to eq '4567'
+    end
+
+    it 'overrides the server correctly' do
+      expect(described_class.server).to eq 'puma'
     end
   end
-
 end

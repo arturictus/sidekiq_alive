@@ -65,7 +65,7 @@ bundle exec sidekiq
 
 ```
 curl localhost:7433
-#=> Alive!                                   
+#=> Alive!
 ```
 
 
@@ -202,6 +202,12 @@ SidekiqAlive.setup do |config|
   #
   #   config.port = 7433
 
+  # ==> Rack server
+  # Web server used to serve an HTTP response.
+  # default: 'webrick'
+  #
+  #   config.server = 'puma'
+
   # ==> Liveness key
   # Key to be stored in Redis as probe of liveness
   # default: "SIDEKIQ::LIVENESS_PROBE_TIMESTAMP"
@@ -227,7 +233,7 @@ SidekiqAlive.setup do |config|
   # ==> Queue Prefix
   # SidekiqAlive will run in a independent queue for each instance/replica
   # This queue name will be generated with: "#{queue_prefix}-#{hostname}.
-  # You can customize the prefix here. 
+  # You can customize the prefix here.
   # default: :sidekiq_alive
   #
   #    config.queue_prefix = :other

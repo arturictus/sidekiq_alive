@@ -37,5 +37,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec-sidekiq", "~> 3.0"
   spec.add_development_dependency "mock_redis"
   spec.add_dependency "sidekiq"
-  spec.add_dependency "sinatra"
 end

@@ -1,8 +1,11 @@
+# frozen_string_literal: true
+
 require 'sinatra/base'
 module SidekiqAlive
   class Server < Sinatra::Base
     set :bind, '0.0.0.0'
     set :port, -> { SidekiqAlive.config.port }
+    set :server, -> { SidekiqAlive.config.server }
 
     get '/' do
       if SidekiqAlive.alive?

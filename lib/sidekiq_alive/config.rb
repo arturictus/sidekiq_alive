@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SidekiqAlive
   class Config
     include Singleton
@@ -7,7 +9,8 @@ module SidekiqAlive
                   :time_to_live,
                   :callback,
                   :registered_instance_key,
-                  :queue_prefix
+                  :queue_prefix,
+                  :server
 
     def initialize
       set_defaults
@@ -20,10 +23,11 @@ module SidekiqAlive
       @callback = proc {}
       @registered_instance_key = 'SIDEKIQ_REGISTERED_INSTANCE'
       @queue_prefix = :sidekiq_alive
+      @server = ENV['SIDEKIQ_ALIVE_SERVER'] || 'webrick'
     end
 
     def registration_ttl
-      @registration_ttl ? @registration_ttl : time_to_live + 60
+      @registration_ttl || time_to_live + 60
     end
   end
 end

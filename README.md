@@ -227,10 +227,16 @@ SidekiqAlive.setup do |config|
   # ==> Queue Prefix
   # SidekiqAlive will run in a independent queue for each instance/replica
   # This queue name will be generated with: "#{queue_prefix}-#{hostname}.
-  # You can customize the prefix here. 
+  # You can customize the prefix here.
   # default: :sidekiq_alive
   #
   #    config.queue_prefix = :other
+
+  # ==> Rack server
+  # Web server used to run Sinatra
+  # default: webrick
+  #
+  #   config.server = 'puma'
 
 end
 ```

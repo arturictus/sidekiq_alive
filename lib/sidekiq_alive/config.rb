@@ -10,7 +10,8 @@ module SidekiqAlive
                   :callback,
                   :registered_instance_key,
                   :queue_prefix,
-                  :server
+                  :server,
+                  :custom_liveness_probe
 
     def initialize
       set_defaults
@@ -24,6 +25,7 @@ module SidekiqAlive
       @registered_instance_key = 'SIDEKIQ_REGISTERED_INSTANCE'
       @queue_prefix = :sidekiq_alive
       @server = ENV['SIDEKIQ_ALIVE_SERVER'] || 'webrick'
+      @custom_liveness_probe = proc {}
     end
 
     def registration_ttl

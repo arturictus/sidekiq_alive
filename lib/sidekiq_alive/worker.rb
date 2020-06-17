@@ -1,11 +1,17 @@
+# frozen_string_literal: true
+
 module SidekiqAlive
   class Worker
     include Sidekiq::Worker
     sidekiq_options retry: false
 
     def perform(_hostname = SidekiqAlive.hostname)
+      # Checks if custom liveness probe passes should fail or return false
+      return unless config.custom_liveness_probe.call
+
+      # Writes the liveness in Redis
       write_living_probe
-      # schedule next living probe
+      # schedules next living probe
       self.class.perform_in(config.time_to_live / 2, current_hostname)
     end
 

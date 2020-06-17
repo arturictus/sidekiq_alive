@@ -238,6 +238,12 @@ SidekiqAlive.setup do |config|
   #
   #    config.queue_prefix = :other
 
+  # ==> Rack server
+  # Web server used to run Sinatra
+  # default: webrick
+  #
+  #   config.server = 'puma'
+
 end
 ```
 

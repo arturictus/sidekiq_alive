@@ -3,7 +3,7 @@ module SidekiqAlive
     include Sidekiq::Worker
     sidekiq_options retry: false
 
-    def perform(hostname = SidekiqAlive.hostname)
+    def perform(_hostname = SidekiqAlive.hostname)
       write_living_probe
       # schedule next living probe
       self.class.perform_in(config.time_to_live / 2, current_hostname)
@@ -21,7 +21,11 @@ module SidekiqAlive
       # Increment ttl for current registered instance
       SidekiqAlive.register_current_instance
       # after callbacks
-      config.callback.call() rescue nil
+      begin
+        config.callback.call
+      rescue StandardError
+        nil
+      end
     end
 
     def current_hostname

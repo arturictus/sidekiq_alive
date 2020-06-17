@@ -27,6 +27,7 @@ module SidekiqAlive
       sq_config.on(:quiet) do
         SidekiqAlive.unregister_current_instance
       end
+
       sq_config.on(:shutdown) do
         Process.kill('TERM', @server_pid) unless @server_pid.nil?
         Process.wait(@server_pid) unless @server_pid.nil?

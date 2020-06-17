@@ -6,7 +6,11 @@ module SidekiqAlive
   class Server
     class << self
       def run!
-        Rack::Handler.get(server).run(self, :Port => port, :Host => '0.0.0.0')
+        handler =  Rack::Handler.get(server)
+
+        Signal.trap('TERM') { handler.shutdown }
+
+        handler.run(self, Port: port, Host: '0.0.0.0')
       end
 
       def port

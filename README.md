@@ -202,12 +202,6 @@ SidekiqAlive.setup do |config|
   #
   #   config.port = 7433
 
-  # ==> Rack server
-  # Web server used to serve an HTTP response.
-  # default: 'webrick'
-  #
-  #   config.server = 'puma'
-
   # ==> Liveness key
   # Key to be stored in Redis as probe of liveness
   # default: "SIDEKIQ::LIVENESS_PROBE_TIMESTAMP"
@@ -239,11 +233,10 @@ SidekiqAlive.setup do |config|
   #    config.queue_prefix = :other
 
   # ==> Rack server
-  # Web server used to run Sinatra
-  # default: webrick
+  # Web server used to serve an HTTP response.
+  # default: 'webrick'
   #
-  #   config.server = 'puma'
-
+  #    config.server = 'puma'
 end
 ```
 

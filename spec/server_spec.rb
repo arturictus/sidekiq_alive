@@ -59,4 +59,25 @@ RSpec.describe SidekiqAlive::Server do
       expect(described_class.server).to eq 'puma'
     end
   end
+
+  describe 'SidekiqAlive setup path' do
+    before do
+      ENV['SIDEKIQ_ALIVE_PATH'] = '/sidekiq-probe'
+      SidekiqAlive.config.set_defaults
+    end
+
+    after do
+      ENV['SIDEKIQ_ALIVE_PATH'] = nil
+    end
+
+    it 'respects the SIDEKIQ_ALIVE_PORT environment variable' do
+      expect(described_class.path).to eq '/sidekiq-probe'
+    end
+
+    it 'responds ok to the given path' do
+      allow(SidekiqAlive).to receive(:alive?) { true }
+      get '/sidekiq-probe'
+      expect(last_response).to be_ok
+    end
+  end
 end

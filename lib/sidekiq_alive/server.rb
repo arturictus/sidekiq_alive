@@ -17,12 +17,16 @@ module SidekiqAlive
         SidekiqAlive.config.port
       end
 
+      def path
+        SidekiqAlive.config.path
+      end
+
       def server
         SidekiqAlive.config.server
       end
 
       def call(env)
-        if Rack::Request.new(env).path != '/'
+        if Rack::Request.new(env).path != path
           [404, {}, ['Not found']]
         elsif SidekiqAlive.alive?
           [200, {}, ['Alive!']]

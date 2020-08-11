@@ -21,6 +21,12 @@ RSpec.describe SidekiqAlive::Server do
       expect(last_response).not_to be_ok
       expect(last_response.body).to eq("Can't find the alive key")
     end
+
+    it 'responds not found on an unknown path' do
+      get '/unknown-path'
+      expect(last_response).not_to be_ok
+      expect(last_response.body).to eq("Not found")
+    end
   end
 
   describe 'SidekiqAlive setup port' do

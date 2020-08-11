@@ -22,7 +22,9 @@ module SidekiqAlive
       end
 
       def call(env)
-        if SidekiqAlive.alive?
+        if Rack::Request.new(env).path != '/'
+          [404, {}, ['Not found']]
+        elsif SidekiqAlive.alive?
           [200, {}, ['Alive!']]
         else
           response = "Can't find the alive key"

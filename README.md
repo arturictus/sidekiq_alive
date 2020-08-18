@@ -208,7 +208,7 @@ SidekiqAlive.setup do |config|
   # Can also be set with the environment variable SIDEKIQ_ALIVE_PATH.
   # default: '/'
   #
-  #   config.port = '/'
+  #   config.path = '/'
 
   # ==> Liveness key
   # Key to be stored in Redis as probe of liveness

@@ -65,7 +65,7 @@ bundle exec sidekiq
 
 ```
 curl localhost:7433
-#=> Alive!                                   
+#=> Alive!
 ```
 
 
@@ -197,10 +197,18 @@ curl localhost:7433
 ```ruby
 SidekiqAlive.setup do |config|
   # ==> Server port
-  # Port to bind the server
+  # Port to bind the server.
+  # Can also be set with the environment variable SIDEKIQ_ALIVE_PORT.
   # default: 7433
   #
   #   config.port = 7433
+
+  # ==> Server path
+  # HTTP path to respond to.
+  # Can also be set with the environment variable SIDEKIQ_ALIVE_PATH.
+  # default: '/'
+  #
+  #   config.path = '/'
 
   # ==> Liveness key
   # Key to be stored in Redis as probe of liveness
@@ -233,11 +241,11 @@ SidekiqAlive.setup do |config|
   #    config.queue_prefix = :other
 
   # ==> Rack server
-  # Web server used to run Sinatra
-  # default: webrick
+  # Web server used to serve an HTTP response.
+  # Can also be set with the environment variable SIDEKIQ_ALIVE_SERVER.
+  # default: 'webrick'
   #
-  #   config.server = 'puma'
-
+  #    config.server = 'puma'
 end
 ```
 

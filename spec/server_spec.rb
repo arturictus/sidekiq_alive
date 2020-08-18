@@ -21,9 +21,15 @@ RSpec.describe SidekiqAlive::Server do
       expect(last_response).not_to be_ok
       expect(last_response.body).to eq("Can't find the alive key")
     end
+
+    it 'responds not found on an unknown path' do
+      get '/unknown-path'
+      expect(last_response).not_to be_ok
+      expect(last_response.body).to eq("Not found")
+    end
   end
 
-  describe 'SidekiqAlive setup' do
+  describe 'SidekiqAlive setup port' do
     before do
       ENV['SIDEKIQ_ALIVE_PORT'] = '4567'
       SidekiqAlive.config.set_defaults
@@ -38,6 +44,7 @@ RSpec.describe SidekiqAlive::Server do
       expect(described_class.server).to eq 'webrick'
     end
   end
+
   describe 'SidekiqAlive setup server' do
     before do
       ENV['SIDEKIQ_ALIVE_SERVER'] = 'puma'
@@ -50,6 +57,27 @@ RSpec.describe SidekiqAlive::Server do
 
     it 'respects the SIDEKIQ_ALIVE_PORT environment variable' do
       expect(described_class.server).to eq 'puma'
+    end
+  end
+
+  describe 'SidekiqAlive setup path' do
+    before do
+      ENV['SIDEKIQ_ALIVE_PATH'] = '/sidekiq-probe'
+      SidekiqAlive.config.set_defaults
+    end
+
+    after do
+      ENV['SIDEKIQ_ALIVE_PATH'] = nil
+    end
+
+    it 'respects the SIDEKIQ_ALIVE_PORT environment variable' do
+      expect(described_class.path).to eq '/sidekiq-probe'
+    end
+
+    it 'responds ok to the given path' do
+      allow(SidekiqAlive).to receive(:alive?) { true }
+      get '/sidekiq-probe'
+      expect(last_response).to be_ok
     end
   end
 end

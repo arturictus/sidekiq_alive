@@ -44,6 +44,19 @@ RSpec.describe SidekiqAlive do
     expect(k.queue_prefix).to eq :other
   end
 
+  describe '::start' do
+    before do
+      allow(Sidekiq).to receive(:server?).and_return(true)
+    end
+
+    it 'prepend sidekiq alive queue' do
+      Sidekiq.options[:queues] = ['default']
+      SidekiqAlive.start
+
+      expect(Sidekiq.options[:queues].first).to eq(described_class.current_queue)
+    end
+  end
+
   before do
     allow(SidekiqAlive).to receive(:redis).and_return(MockRedis.new)
   end

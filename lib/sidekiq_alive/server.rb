@@ -10,7 +10,11 @@ module SidekiqAlive
 
         Signal.trap('TERM') { handler.shutdown }
 
-        handler.run(self, Port: port, Host: '0.0.0.0')
+        handler.run(self, Port: port, Host: host)
+      end
+
+      def host
+        SidekiqAlive.config.host
       end
 
       def port

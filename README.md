@@ -196,6 +196,13 @@ curl localhost:7433
 
 ```ruby
 SidekiqAlive.setup do |config|
+  # ==> Server host
+  # Host to bind the server.
+  # Can also be set with the environment variable SIDEKIQ_ALIVE_HOST.
+  # default: 0.0.0.0
+  #
+  #   config.host = 0.0.0.0
+
   # ==> Server port
   # Port to bind the server.
   # Can also be set with the environment variable SIDEKIQ_ALIVE_PORT.

@@ -29,6 +29,21 @@ RSpec.describe SidekiqAlive::Server do
     end
   end
 
+  describe 'SidekiqAlive setup host' do
+    before do
+      ENV['SIDEKIQ_ALIVE_HOST'] = '1.2.3.4'
+      SidekiqAlive.config.set_defaults
+    end
+
+    after do
+      ENV['SIDEKIQ_ALIVE_HOST'] = nil
+    end
+
+    it 'respects the SIDEKIQ_ALIVE_HOST environment variable' do
+      expect(described_class.host).to eq '1.2.3.4'
+    end
+  end
+
   describe 'SidekiqAlive setup port' do
     before do
       ENV['SIDEKIQ_ALIVE_PORT'] = '4567'

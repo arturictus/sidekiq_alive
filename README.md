@@ -7,7 +7,7 @@
 SidekiqAlive offers a solution to add liveness probe for a Sidekiq instance deployed in Kubernetes.
 This library can be used to check sidekiq health outside kubernetes.
 
-__How?__
+**How?**
 
 A http server is started and on each requests validates that a liveness key is stored in Redis. If it is there means is working.
 
@@ -52,7 +52,6 @@ Or install it yourself as:
 
     $ gem install sidekiq_alive
 
-
 ## Usage
 
 SidekiqAlive will start when running `sidekiq` command.
@@ -68,8 +67,7 @@ curl localhost:7433
 #=> Alive!
 ```
 
-
-__how to disable?__
+**how to disable?**
 You can disabled by setting `ENV` variable `DISABLE_SIDEKIQ_ALIVE`
 example:
 
@@ -115,7 +113,7 @@ spec:
         preStop:
           exec:
             # SIGTERM triggers a quick exit; gracefully terminate instead
-            command: ["bundle", "exec", "sidekiqctl", "quiet"]
+            command: ['bundle', 'exec', 'sidekiqctl', 'quiet']
   terminationGracePeriodSeconds: 60 # put your longest Job time here plus security time.
 ```
 
@@ -172,7 +170,7 @@ spec:
         preStop:
           exec:
             # SIGTERM triggers a quick exit; gracefully terminate instead
-            command: ["kube/sidekiq_quiet"]
+            command: ['kube/sidekiq_quiet']
   terminationGracePeriodSeconds: 60 # put your longest Job time here plus security time.
 ```
 
@@ -216,6 +214,13 @@ SidekiqAlive.setup do |config|
   # default: '/'
   #
   #   config.path = '/'
+
+  # ==> Custom Liveness Probe
+  # Extra check to decide if restart the pod or not for example connection to DB.
+  # `false`, `nil` or `raise` will not write the liveness probe
+  # default: proc { true }
+  #
+  #     config.custom_liveness_probe = proc { db_running? }
 
   # ==> Liveness key
   # Key to be stored in Redis as probe of liveness

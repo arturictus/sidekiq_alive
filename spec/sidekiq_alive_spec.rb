@@ -3,6 +3,24 @@ RSpec.describe SidekiqAlive do
     expect(SidekiqAlive::VERSION).not_to be nil
   end
 
+  it 'configures the host from the #setup' do
+    described_class.setup do |config|
+      config.host = '1.2.3.4'
+    end
+
+    expect(described_class.config.host).to eq '1.2.3.4'
+  end
+
+  it 'configures the host from the SIDEKIQ_ALIVE_HOST ENV var' do
+    ENV['SIDEKIQ_ALIVE_HOST'] = '1.2.3.4'
+
+    SidekiqAlive.config.set_defaults
+
+    expect(described_class.config.host).to eq '1.2.3.4'
+
+    ENV['SIDEKIQ_ALIVE_HOST'] = nil
+  end
+
   it 'configures the port from the #setup' do
     described_class.setup do |config|
       config.port = 4567
@@ -23,6 +41,11 @@ RSpec.describe SidekiqAlive do
 
   it 'configurations behave as expected' do
     k = described_class.config
+
+    expect(k.host).to eq '0.0.0.0'
+    k.host = '1.2.3.4'
+    expect(k.host).to eq '1.2.3.4'
+
     expect(k.port).to eq 7433
     k.port = 4567
     expect(k.port).to eq 4567
@@ -42,6 +65,19 @@ RSpec.describe SidekiqAlive do
     expect(k.queue_prefix).to eq :sidekiq_alive
     k.queue_prefix = :other
     expect(k.queue_prefix).to eq :other
+  end
+
+  describe '::start' do
+    before do
+      allow(Sidekiq).to receive(:server?).and_return(true)
+    end
+
+    it 'prepend sidekiq alive queue' do
+      Sidekiq.options[:queues] = ['default']
+      SidekiqAlive.start
+
+      expect(Sidekiq.options[:queues].first).to eq(described_class.current_queue)
+    end
   end
 
   before do

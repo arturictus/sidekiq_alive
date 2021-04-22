@@ -9,7 +9,7 @@ module SidekiqAlive
     SidekiqAlive::Worker.sidekiq_options queue: current_queue
     Sidekiq.configure_server do |sq_config|
 
-      sq_config.options[:queues] << current_queue
+      sq_config.options[:queues].unshift(current_queue)
 
       sq_config.on(:startup) do
         SidekiqAlive.tap do |sa|
@@ -27,6 +27,7 @@ module SidekiqAlive
       sq_config.on(:quiet) do
         SidekiqAlive.unregister_current_instance
       end
+
       sq_config.on(:shutdown) do
         Process.kill('TERM', @server_pid) unless @server_pid.nil?
         Process.wait(@server_pid) unless @server_pid.nil?

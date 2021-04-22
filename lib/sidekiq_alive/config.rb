@@ -4,7 +4,9 @@ module SidekiqAlive
   class Config
     include Singleton
 
-    attr_accessor :port,
+    attr_accessor :host,
+                  :port,
+                  :path,
                   :liveness_key,
                   :time_to_live,
                   :callback,
@@ -18,7 +20,9 @@ module SidekiqAlive
     end
 
     def set_defaults
+      @host = ENV['SIDEKIQ_ALIVE_HOST'] || '0.0.0.0'
       @port = ENV['SIDEKIQ_ALIVE_PORT'] || 7433
+      @path = ENV['SIDEKIQ_ALIVE_PATH'] || '/'
       @liveness_key = 'SIDEKIQ::LIVENESS_PROBE_TIMESTAMP'
       @time_to_live = 10 * 60
       @callback = proc {}

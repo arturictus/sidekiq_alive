@@ -25,7 +25,7 @@ module SidekiqAlive
       @registered_instance_key = 'SIDEKIQ_REGISTERED_INSTANCE'
       @queue_prefix = :sidekiq_alive
       @server = ENV['SIDEKIQ_ALIVE_SERVER'] || 'webrick'
-      @custom_liveness_probe = proc {}
+      @custom_liveness_probe = proc { true }
     end
 
     def registration_ttl

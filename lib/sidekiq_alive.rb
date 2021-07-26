@@ -163,4 +163,4 @@ end
 require 'sidekiq_alive/worker'
 require 'sidekiq_alive/server'
 
-SidekiqAlive.start unless ENV['DISABLE_SIDEKIQ_ALIVE']
+SidekiqAlive.start unless ENV.fetch('DISABLE_SIDEKIQ_ALIVE', '').casecmp("true") == 0

@@ -1,6 +1,6 @@
 # SidekiqAlive
 
-[![Build Status](https://travis-ci.org/arturictus/sidekiq_alive.svg?branch=master)](https://travis-ci.org/arturictus/sidekiq_alive)
+![build](https://github.com/arturictus/sidekiq_alive/actions/workflows/ruby.yml/badge.svg)
 [![Maintainability](https://api.codeclimate.com/v1/badges/35c39124564ffeb0ce4e/maintainability)](https://codeclimate.com/github/arturictus/sidekiq_alive/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/35c39124564ffeb0ce4e/test_coverage)](https://codeclimate.com/github/arturictus/sidekiq_alive/test_coverage)
 

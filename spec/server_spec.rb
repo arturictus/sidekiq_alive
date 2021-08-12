@@ -7,6 +7,24 @@ RSpec.describe SidekiqAlive::Server do
 
   subject(:app) { described_class }
 
+  describe '#run!' do
+    subject { app.run! }
+
+    let(:fake_webrick) { double }
+
+    it 'runs the handler with sidekiq_alive logger' do
+      allow(Rack::Handler).to receive(:get).with('webrick').and_return(fake_webrick)
+
+      expect(fake_webrick).to receive(:run).with(
+        described_class,
+        hash_including(Logger: SidekiqAlive.logger)
+      )
+
+      subject
+    end
+
+  end
+
   describe 'responses' do
     it 'responds with success when the service is alive' do
       allow(SidekiqAlive).to receive(:alive?) { true }

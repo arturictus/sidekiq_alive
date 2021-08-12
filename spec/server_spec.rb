@@ -14,22 +14,35 @@ RSpec.describe SidekiqAlive::Server do
 
     let(:fake_webrick) { double }
 
-    it 'runs the handler with sidekiq_alive logger' do
+    it 'runs the handler with sidekiq_alive logger, host and no access logs' do
       expect(fake_webrick).to receive(:run).with(
         described_class,
-        hash_including(Logger: SidekiqAlive.logger)
+        hash_including(Logger: SidekiqAlive.logger,
+                       Host: '0.0.0.0',
+                       AccessLog: [])
       )
 
       subject
     end
 
-    it 'runs the handler with host specified' do
-      expect(fake_webrick).to receive(:run).with(
-        described_class,
-        hash_including(host: '')
-      )
+    context 'when we change the host config' do
+      around do |example|
+        ENV['SIDEKIQ_ALIVE_HOST'] = '1.2.3.4'
+        SidekiqAlive.config.set_defaults
 
-      subject
+        example.run
+
+        ENV['SIDEKIQ_ALIVE_HOST'] = nil
+      end
+
+      it 'respects the SIDEKIQ_ALIVE_HOST environment variable' do
+        expect(fake_webrick).to receive(:run).with(
+          described_class,
+          hash_including(Host: '1.2.3.4')
+        )
+
+        subject
+      end
     end
   end
 

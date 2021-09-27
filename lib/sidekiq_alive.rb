@@ -58,7 +58,7 @@ module SidekiqAlive
   def self.deep_scan(keyword, keys = [], cursor = 0)
     next_cursor, found_keys = *redis { |r| r }.scan(cursor, match: keyword)
     keys += found_keys
-    return keys if next_cursor == "0" || found_keys.blank?
+    return keys if next_cursor == "0"
     deep_scan(keyword, keys, next_cursor)
   end
 

@@ -52,7 +52,14 @@ module SidekiqAlive
   end
 
   def self.registered_instances
-    redis.keys("#{config.registered_instance_key}::*")
+    deep_scan("#{config.registered_instance_key}::*")
+  end
+
+  def self.deep_scan(keyword, keys = [], cursor = 0)
+    next_cursor, found_keys = *redis { |r| r }.scan(cursor, match: keyword)
+    keys += found_keys
+    return keys if next_cursor == "0" || found_keys.blank?
+    deep_scan(keyword, keys, next_cursor)
   end
 
   def self.purge_pending_jobs
@@ -156,4 +163,4 @@ end
 require 'sidekiq_alive/worker'
 require 'sidekiq_alive/server'
 
-SidekiqAlive.start unless ENV['DISABLE_SIDEKIQ_ALIVE']
+SidekiqAlive.start unless ENV.fetch('DISABLE_SIDEKIQ_ALIVE', '').casecmp("true") == 0

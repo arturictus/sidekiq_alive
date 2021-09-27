@@ -7,6 +7,45 @@ RSpec.describe SidekiqAlive::Server do
 
   subject(:app) { described_class }
 
+  describe '#run!' do
+    subject { app.run! }
+
+    before { allow(Rack::Handler).to receive(:get).with('webrick').and_return(fake_webrick) }
+
+    let(:fake_webrick) { double }
+
+    it 'runs the handler with sidekiq_alive logger, host and no access logs' do
+      expect(fake_webrick).to receive(:run).with(
+        described_class,
+        hash_including(Logger: SidekiqAlive.logger,
+                       Host: '0.0.0.0',
+                       AccessLog: [])
+      )
+
+      subject
+    end
+
+    context 'when we change the host config' do
+      around do |example|
+        ENV['SIDEKIQ_ALIVE_HOST'] = '1.2.3.4'
+        SidekiqAlive.config.set_defaults
+
+        example.run
+
+        ENV['SIDEKIQ_ALIVE_HOST'] = nil
+      end
+
+      it 'respects the SIDEKIQ_ALIVE_HOST environment variable' do
+        expect(fake_webrick).to receive(:run).with(
+          described_class,
+          hash_including(Host: '1.2.3.4')
+        )
+
+        subject
+      end
+    end
+  end
+
   describe 'responses' do
     it 'responds with success when the service is alive' do
       allow(SidekiqAlive).to receive(:alive?) { true }

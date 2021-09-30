@@ -6,12 +6,12 @@ require 'sidekiq_alive/config'
 
 module SidekiqAlive
   def self.start
-    SidekiqAlive::Worker.sidekiq_options queue: current_queue
     Sidekiq.configure_server do |sq_config|
 
       sq_config.options[:queues].unshift(current_queue)
 
       sq_config.on(:startup) do
+        SidekiqAlive::Worker.sidekiq_options queue: current_queue
         SidekiqAlive.tap do |sa|
           sa.logger.info(banner)
           sa.register_current_instance
@@ -136,7 +136,7 @@ module SidekiqAlive
     Port: #{config.port}
     Time to live: #{config.time_to_live}s
     Current instance register key: #{current_instance_register_key}
-    Worker running on queue: #{@queue}
+    Worker running on queue: #{current_queue}
 
 
     starting ...

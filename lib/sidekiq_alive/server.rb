@@ -6,7 +6,7 @@ module SidekiqAlive
   class Server
     class << self
       def run!
-        handler =  Rack::Handler.get(server)
+        handler = Rack::Handler.get(server)
 
         Signal.trap('TERM') { handler.shutdown }
 

@@ -56,10 +56,12 @@ module SidekiqAlive
   end
 
   def self.deep_scan(keyword, keys = [], cursor = 0)
-    next_cursor, found_keys = *redis { |r| r }.scan(cursor, match: keyword)
-    keys += found_keys
-    return keys if next_cursor == "0"
-    deep_scan(keyword, keys, next_cursor)
+    loop do
+      cursor, found_keys = SidekiqAlive.redis.scan(cursor, match: keyword, count: 1000)
+      keys += found_keys
+      break if cursor.to_i == 0
+    end
+    keys
   end
 
   def self.purge_pending_jobs

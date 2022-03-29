@@ -106,6 +106,11 @@ RSpec.describe SidekiqAlive do
   end
 
   it '::registered_instances' do
+    [*(1..1000)].each do |n|
+      SidekiqAlive.redis.set("#{n}-value",
+      Time.now.to_i,
+      ex: 60)
+    end
     expect(SidekiqAlive.registered_instances).to eq []
     SidekiqAlive.register_current_instance
     expect(SidekiqAlive.registered_instances.count).to eq 1

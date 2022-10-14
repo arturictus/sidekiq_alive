@@ -3,10 +3,10 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'sidekiq_alive/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'sidekiq_alive'
+  spec.name          = 'sidekiq-alive'
   spec.version       = SidekiqAlive::VERSION
-  spec.authors       = ['Artur Pañach']
-  spec.email         = ['arturictus@gmail.com']
+  spec.authors       = ['Andrejs Cunskis']
+  spec.email         = ['andrejs.cunskis@gmail.com']
 
   spec.summary       = 'Liveness probe for sidekiq on Kubernetes deployments.'
   spec.description   = 'SidekiqAlive offers a solution to add liveness probe of a Sidekiq instance.
@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   this key gets expired by Redis an consequently the http server will return a 500 error.
 
   This Job is responsible to requeue itself for the next liveness probe.'
-  spec.homepage      = 'https://github.com/arturictus/sidekiq_alive'
+  spec.homepage      = 'https://github.com/andrcuns/sidekiq-alive'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|

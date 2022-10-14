@@ -14,7 +14,8 @@ module SidekiqAlive
                   :queue_prefix,
                   :server,
                   :custom_liveness_probe,
-                  :logger
+                  :logger,
+                  :shutdown_callback
 
     def initialize
       set_defaults
@@ -31,6 +32,7 @@ module SidekiqAlive
       @queue_prefix = :sidekiq_alive
       @server = ENV.fetch('SIDEKIQ_ALIVE_SERVER', 'webrick')
       @custom_liveness_probe = proc { true }
+      @shutdown_callback = proc {}
     end
 
     def registration_ttl

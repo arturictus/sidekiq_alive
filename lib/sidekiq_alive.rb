@@ -11,26 +11,27 @@ module SidekiqAlive
       sq_config[:queues].unshift(current_queue)
 
       sq_config.on(:startup) do
-        SidekiqAlive.tap do |sa|
-          sa.logger.info(startup_info)
-          sa.register_current_instance
-          sa.store_alive_key
-          sa::Worker.perform_async(hostname)
-          @server_pid = fork do
-            sa::Server.run!
-          end
-          sa.logger.info(successful_startup_text)
-        end
+        logger.info(startup_info)
+
+        register_current_instance
+        store_alive_key
+        SidekiqAlive::Worker.perform_async(hostname)
+        @server_pid = fork { SidekiqAlive::Server.run! }
+
+        logger.info(successful_startup_text)
       end
 
       sq_config.on(:quiet) do
-        SidekiqAlive.unregister_current_instance
+        unregister_current_instance
+        config.shutdown_callback.call
       end
 
       sq_config.on(:shutdown) do
         Process.kill('TERM', @server_pid) unless @server_pid.nil?
         Process.wait(@server_pid) unless @server_pid.nil?
-        SidekiqAlive.unregister_current_instance
+
+        unregister_current_instance
+        config.shutdown_callback.call
       end
     end
   end
@@ -120,12 +121,14 @@ module SidekiqAlive
   end
 
   def self.startup_info
-    {
+    info = {
       hostname: hostname,
       port: config.port,
       ttl: config.time_to_live,
       queue: current_queue
     }
+
+    "Starting sidekiq-alive: #{info}"
   end
 
   def self.successful_startup_text
@@ -140,4 +143,4 @@ end
 require 'sidekiq_alive/worker'
 require 'sidekiq_alive/server'
 
-SidekiqAlive.start unless ENV.fetch('DISABLE_SIDEKIQ_ALIVE', '').casecmp('true') == 0
+SidekiqAlive.start unless ENV.fetch('DISABLE_SIDEKIQ_ALIVE', '').casecmp('true').zero?

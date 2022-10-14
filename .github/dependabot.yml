@@ -6,3 +6,9 @@ updates:
       interval: "daily"
     reviewers:
       - "andrcuns"
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - andrcuns

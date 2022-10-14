@@ -35,6 +35,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rspec-sidekiq', '~> 3.0'
-  spec.add_dependency 'sidekiq'
-  spec.add_dependency 'webrick'
+  spec.add_dependency 'sidekiq', '>= 5', '< 7'
+  spec.add_dependency 'webrick', '>= 1', '< 2'
 end

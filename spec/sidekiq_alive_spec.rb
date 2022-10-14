@@ -73,10 +73,10 @@ RSpec.describe SidekiqAlive do
     end
 
     it 'prepend sidekiq alive queue' do
-      Sidekiq.options[:queues] = ['default']
+      Sidekiq[:queues] = ['default']
       SidekiqAlive.start
 
-      expect(Sidekiq.options[:queues].first).to eq(described_class.current_queue)
+      expect(Sidekiq[:queues].first).to eq(described_class.current_queue)
     end
   end
 

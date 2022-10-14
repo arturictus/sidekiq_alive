@@ -1,10 +1,12 @@
-name: Ruby CI
+name: Test
 
 on:
   push:
-    branches: [main, master]
+    branches:
+      - master
   pull_request:
-    branches: [main, master]
+    branches:
+      - master
 
 jobs:
   test:
@@ -12,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        ruby-version: ["3.1", "3.0", "2.7", "2.6", "2.5"]
+        ruby-version: ["3.1", "3.0", "2.7"]
       # Service containers to run with `runner-job`
     services:
       # Label used to access the service container
@@ -35,7 +37,8 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby-version }}
+          bundler-cache: true
       - name: Install dependencies
         run: bundle install
       - name: Run tests
-        run: bundle exec rspec
+        run: bundle exec rspec --color

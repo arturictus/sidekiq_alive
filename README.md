@@ -1,8 +1,6 @@
 # SidekiqAlive
 
-![build](https://github.com/arturictus/sidekiq_alive/actions/workflows/ruby.yml/badge.svg)
-[![Maintainability](https://api.codeclimate.com/v1/badges/35c39124564ffeb0ce4e/maintainability)](https://codeclimate.com/github/arturictus/sidekiq_alive/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/35c39124564ffeb0ce4e/test_coverage)](https://codeclimate.com/github/arturictus/sidekiq_alive/test_coverage)
+*This is the fork of 'arturictus/sidekiq_alive' with a few minor fixes and tweaks, all credit goes to author of original repo*
 
 SidekiqAlive offers a solution to add liveness probe for a Sidekiq instance deployed in Kubernetes.
 This library can be used to check sidekiq health outside kubernetes.
@@ -41,7 +39,7 @@ hostname: bar
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'sidekiq_alive'
+gem 'sidekiq-alive'
 ```
 
 And then execute:
@@ -50,7 +48,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install sidekiq_alive
+    $ gem install sidekiq-alive
 
 ## Usage
 

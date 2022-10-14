@@ -8,7 +8,8 @@ module SidekiqAlive
   def self.start
     Sidekiq.configure_server do |sq_config|
       SidekiqAlive::Worker.sidekiq_options queue: current_queue
-      sq_config[:queues].unshift(current_queue)
+
+      (Sidekiq.respond_to?(:[]) ? sq_config[:queues] : sq_config.options[:queues]).unshift(current_queue)
 
       sq_config.on(:startup) do
         logger.info(startup_info)

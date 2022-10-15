@@ -1,6 +1,6 @@
 # SidekiqAlive
 
-*This is the fork of 'arturictus/sidekiq_alive' with a few minor fixes and tweaks, all credit goes to author of original repo*
+**This is the fork of 'arturictus/sidekiq_alive' with a few minor fixes and tweaks, all credit goes to author of original repo**
 
 SidekiqAlive offers a solution to add liveness probe for a Sidekiq instance deployed in Kubernetes.
 This library can be used to check sidekiq health outside kubernetes.

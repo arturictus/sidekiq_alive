@@ -39,7 +39,7 @@ hostname: bar
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'sidekiq-alive'
+gem 'sidekiq-alive-next'
 ```
 
 And then execute:
@@ -48,7 +48,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install sidekiq-alive
+    $ gem install sidekiq-alive-next
 
 ## Usage
 

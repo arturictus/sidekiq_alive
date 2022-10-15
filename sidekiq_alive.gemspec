@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'sidekiq_alive/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'sidekiq-alive'
+  spec.name          = 'sidekiq-alive-next'
   spec.version       = SidekiqAlive::VERSION
   spec.authors       = ['Andrejs Cunskis']
   spec.email         = ['andrejs.cunskis@gmail.com']

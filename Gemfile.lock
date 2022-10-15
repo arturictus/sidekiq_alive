@@ -58,7 +58,7 @@ DEPENDENCIES
   rake (~> 13.0)
   rspec (~> 3.0)
   rspec-sidekiq (~> 3.0)
-  sidekiq-alive!
+  sidekiq-alive-next!
 
 BUNDLED WITH
    2.3.22

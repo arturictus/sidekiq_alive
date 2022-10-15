@@ -1,20 +1,22 @@
-lib = File.expand_path('lib', __dir__)
+# frozen_string_literal: true
+
+lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'sidekiq_alive/version'
+require "sidekiq_alive/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = 'sidekiq-alive-next'
-  spec.authors       = ['Andrejs Cunskis', 'Artur Pañach']
-  spec.email         = ['andrejs.cunskis@gmail.com']
+  spec.name          = "sidekiq-alive-next"
+  spec.authors       = ["Andrejs Cunskis", "Artur Pañach"]
+  spec.email         = ["andrejs.cunskis@gmail.com"]
 
   spec.version       = SidekiqAlive::VERSION
 
-  spec.required_ruby_version = Gem::Requirement.new('>= 2.7.0')
+  spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
 
-  spec.homepage      = 'https://github.com/andrcuns/sidekiq-alive'
-  spec.summary       = 'Liveness probe for sidekiq on Kubernetes deployments.'
-  spec.license       = 'MIT'
+  spec.homepage      = "https://github.com/andrcuns/sidekiq-alive"
+  spec.summary       = "Liveness probe for sidekiq on Kubernetes deployments."
+  spec.license       = "MIT"
   spec.description   = <<~DSC
     SidekiqAlive offers a solution to add liveness probe of a Sidekiq instance.
 
@@ -29,23 +31,25 @@ Gem::Specification.new do |spec|
   DSC
 
   spec.metadata = {
-    'homepage_uri' => spec.homepage,
-    'source_code_uri' => spec.homepage,
-    'changelog_uri' => "#{spec.homepage}/releases",
-    'documentation_uri' => "#{spec.homepage}/blob/v#{spec.version}/README.md",
-    'bug_tracker_uri' => "#{spec.homepage}/issues"
+    "homepage_uri" => spec.homepage,
+    "source_code_uri" => spec.homepage,
+    "changelog_uri" => "#{spec.homepage}/releases",
+    "documentation_uri" => "#{spec.homepage}/blob/v#{spec.version}/README.md",
+    "bug_tracker_uri" => "#{spec.homepage}/issues",
   }
 
-  spec.files         = Dir['README.md', 'lib/**/*']
-  spec.require_paths = ['lib']
+  spec.files         = Dir["README.md", "lib/**/*"]
+  spec.require_paths = ["lib"]
 
-  spec.add_development_dependency 'bundler', '> 1.16'
-  spec.add_development_dependency 'mock_redis'
-  spec.add_development_dependency 'rack-test'
-  spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'rspec-sidekiq', '~> 3.0'
+  spec.add_development_dependency("bundler", "> 1.16")
+  spec.add_development_dependency("mock_redis")
+  spec.add_development_dependency("rack-test")
+  spec.add_development_dependency("rake", "~> 13.0")
+  spec.add_development_dependency("rspec", "~> 3.0")
+  spec.add_development_dependency("rspec-sidekiq", "~> 3.0")
+  spec.add_development_dependency("rubocop-shopify", "~> 2.10")
+  spec.add_development_dependency("solargraph", "~> 0.47.2")
 
-  spec.add_dependency 'sidekiq', '>= 5', '< 7'
-  spec.add_dependency 'webrick', '>= 1', '< 2'
+  spec.add_dependency("sidekiq", ">= 5", "< 7")
+  spec.add_dependency("webrick", ">= 1", "< 2")
 end

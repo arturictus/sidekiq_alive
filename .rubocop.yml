@@ -1,0 +1,10 @@
+inherit_gem:
+  rubocop-shopify: rubocop.yml
+
+AllCops:
+  TargetRubyVersion: 2.7
+  SuggestExtensions: false
+
+Layout/ArgumentAlignment:
+  Enabled: true
+  EnforcedStyle: with_first_argument

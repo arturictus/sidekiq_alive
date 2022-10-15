@@ -9,9 +9,21 @@ on:
       - master
 
 jobs:
+  rubocop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Ruby ${{ matrix.ruby-version }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.1
+          bundler-cache: true
+      - name: Run lint
+        run: bundle exec rubocop --color
+
   test:
     runs-on: ubuntu-latest
-
+    needs: rubocop
     strategy:
       fail-fast: false
       matrix:
@@ -39,7 +51,5 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
-      - name: Install dependencies
-        run: bundle install
       - name: Run tests
-        run: bundle exec rspec --color
+        run: bundle exec rspec --force-color

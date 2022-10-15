@@ -29,7 +29,7 @@ module SidekiqAlive
       @time_to_live = 10 * 60
       @callback = proc {}
       @registered_instance_key = 'SIDEKIQ_REGISTERED_INSTANCE'
-      @queue_prefix = :sidekiq_alive
+      @queue_prefix = :"sidekiq-alive"
       @server = ENV.fetch('SIDEKIQ_ALIVE_SERVER', 'webrick')
       @custom_liveness_probe = proc { true }
       @shutdown_callback = proc {}

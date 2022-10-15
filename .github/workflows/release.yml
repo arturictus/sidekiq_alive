@@ -38,6 +38,9 @@ jobs:
         env:
           GEM_HOST_API_KEY: ${{ secrets.GEM_HOST_API_KEY }}
       -
+        name: Checkout tag
+        run: git checkout v${{ input.version }}
+      -
         name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:

@@ -18,7 +18,10 @@ jobs:
           bundler-cache: true
       -
         name: Create tag and push to rubygems
-        run: bundle exec rake release
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          bundle exec rake release
         env:
           GEM_HOST_API_KEY: ${{ secrets.GEM_HOST_API_KEY }}
 

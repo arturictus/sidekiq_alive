@@ -130,6 +130,8 @@ module SidekiqAlive
         port: config.port,
         ttl: config.time_to_live,
         queue: current_queue,
+        liveness_key: current_lifeness_key,
+        register_key: current_instance_register_key,
       }
 
       "Starting sidekiq-alive: #{info}"

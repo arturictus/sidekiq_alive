@@ -1,32 +1,42 @@
 lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
 require 'sidekiq_alive/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'sidekiq-alive-next'
-  spec.version       = SidekiqAlive::VERSION
-  spec.authors       = ['Andrejs Cunskis']
+  spec.authors       = ['Andrejs Cunskis', 'Artur Pañach']
   spec.email         = ['andrejs.cunskis@gmail.com']
 
-  spec.summary       = 'Liveness probe for sidekiq on Kubernetes deployments.'
-  spec.description   = 'SidekiqAlive offers a solution to add liveness probe of a Sidekiq instance.
+  spec.version       = SidekiqAlive::VERSION
 
-  How?
+  spec.required_ruby_version = Gem::Requirement.new('>= 2.7.0')
 
-  A http server is started and on each requests validates that a liveness key is stored in Redis. If it is there means is working.
-
-  A Sidekiq job is the responsable to storing this key. If Sidekiq stops processing jobs
-  this key gets expired by Redis an consequently the http server will return a 500 error.
-
-  This Job is responsible to requeue itself for the next liveness probe.'
   spec.homepage      = 'https://github.com/andrcuns/sidekiq-alive'
+  spec.summary       = 'Liveness probe for sidekiq on Kubernetes deployments.'
   spec.license       = 'MIT'
+  spec.description   = <<~DSC
+    SidekiqAlive offers a solution to add liveness probe of a Sidekiq instance.
 
-  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
-    f.match(%r{^(test|spec|features)/})
-  end
-  spec.bindir        = 'exe'
-  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+    How?
+
+    A http server is started and on each requests validates that a liveness key is stored in Redis. If it is there means is working.
+
+    A Sidekiq job is the responsable to storing this key. If Sidekiq stops processing jobs
+    this key gets expired by Redis an consequently the http server will return a 500 error.
+
+    This Job is responsible to requeue itself for the next liveness probe.
+  DSC
+
+  spec.metadata = {
+    'homepage_uri' => spec.homepage,
+    'source_code_uri' => spec.homepage,
+    'changelog_uri' => "#{spec.homepage}/releases",
+    'documentation_uri' => "#{spec.homepage}/blob/v#{spec.version}/README.md",
+    'bug_tracker_uri' => "#{spec.homepage}/issues"
+  }
+
+  spec.files         = Dir['README.md', 'lib/**/*']
   spec.require_paths = ['lib']
 
   spec.add_development_dependency 'bundler', '> 1.16'
@@ -35,6 +45,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rspec-sidekiq', '~> 3.0'
+
   spec.add_dependency 'sidekiq', '>= 5', '< 7'
   spec.add_dependency 'webrick', '>= 1', '< 2'
 end

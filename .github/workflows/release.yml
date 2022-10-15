@@ -1,6 +1,12 @@
 name: Release
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version
+        required: true
+        type: string
 
 jobs:
   release:
@@ -10,6 +16,8 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       -
         name: Set up Ruby 3.1
         uses: ruby/setup-ruby@v1
@@ -17,11 +25,14 @@ jobs:
           ruby-version: 3.1.2
           bundler-cache: true
       -
-        name: Create tag and push to rubygems
+        name: Update version
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          bundle exec rake release
+          bundle exec rake "version[${{ inputs.version }}]" && git push
+      -
+        name: Create tag and push to rubygems
+        run: bundle exec rake release
         env:
           GEM_HOST_API_KEY: ${{ secrets.GEM_HOST_API_KEY }}
       -

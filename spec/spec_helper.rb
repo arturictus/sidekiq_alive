@@ -3,7 +3,6 @@
 require "bundler/setup"
 require "sidekiq-alive-next"
 require "rspec-sidekiq"
-require "mock_redis"
 require "rack/test"
 require "pry"
 

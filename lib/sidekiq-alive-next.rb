@@ -14,7 +14,7 @@ module SidekiqAlive
       Sidekiq.configure_server do |sq_config|
         sq_config.on(:startup) do
           SidekiqAlive::Worker.sidekiq_options(queue: current_queue)
-          (sidekiq_6 ? sq_config[:queues] : sq_config.options[:queues]).unshift(current_queue)
+          sq_config.queues.unshift(current_queue)
 
           logger.info(startup_info)
 
@@ -53,31 +53,15 @@ module SidekiqAlive
       # Delete any pending jobs for this instance
       logger.info(shutdown_info)
       purge_pending_jobs
-      redis.del(current_instance_register_key)
+      redis.call("DEL", current_instance_register_key)
     end
 
     def registered_instances
-      deep_scan("#{config.registered_instance_key}::*")
-    end
-
-    def deep_scan(keyword, keys = [], cursor = 0)
-      loop do
-        cursor, found_keys = SidekiqAlive.redis.scan(cursor, match: keyword, count: 1000)
-        keys += found_keys
-        break if cursor.to_i.zero?
-      end
-      keys
+      redis.scan("MATCH", "#{config.registered_instance_key}::*").map { |key| key }
     end
 
     def purge_pending_jobs
-      scheduled_set = Sidekiq::ScheduledSet.new
-
-      jobs = if sidekiq_6
-        scheduled_set.scan('"class":"SidekiqAlive::Worker"')
-      else
-        scheduled_set.select { |job| job.klass == "SidekiqAlive::Worker" && job.queue == current_queue }
-      end
-
+      jobs = Sidekiq::ScheduledSet.new.scan('"class":"SidekiqAlive::Worker"')
       logger.info("[SidekiqAlive] Purging #{jobs.count} pending for #{hostname}")
       jobs.each(&:delete)
 
@@ -90,9 +74,7 @@ module SidekiqAlive
     end
 
     def store_alive_key
-      redis.set(current_lifeness_key,
-                Time.now.to_i,
-                ex: config.time_to_live.to_i)
+      redis.call("SET", current_lifeness_key, Time.now.to_i, ex: config.time_to_live.to_i)
     end
 
     def redis
@@ -147,13 +129,7 @@ module SidekiqAlive
     end
 
     def register_instance(instance_name)
-      redis.set(instance_name, Time.now.to_i, ex: config.registration_ttl.to_i)
-    end
-
-    private
-
-    def sidekiq_6
-      Sidekiq.respond_to?(:[])
+      redis.call("SET", instance_name, Time.now.to_i, ex: config.registration_ttl.to_i)
     end
   end
 end

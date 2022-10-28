@@ -42,14 +42,14 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency("bundler", "> 1.16")
-  spec.add_development_dependency("mock_redis")
-  spec.add_development_dependency("rack-test")
+  spec.add_development_dependency("rack-test", "~> 2.0.2")
   spec.add_development_dependency("rake", "~> 13.0")
   spec.add_development_dependency("rspec", "~> 3.0")
   spec.add_development_dependency("rspec-sidekiq", "~> 3.0")
   spec.add_development_dependency("rubocop-shopify", "~> 2.10")
   spec.add_development_dependency("solargraph", "~> 0.47.2")
 
-  spec.add_dependency("sidekiq", ">= 5", "< 7")
+  spec.add_dependency("rack", ">= 2.2.4", "< 3")
+  spec.add_dependency("sidekiq", ">= 7", "< 8")
   spec.add_dependency("webrick", ">= 1", "< 2")
 end

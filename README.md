@@ -277,7 +277,7 @@ Here is an example [rails app](https://github.com/arturictus/sidekiq_alive_examp
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/arturictus/sidekiq_alive. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/andrcuns/sidekiq-alive. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 

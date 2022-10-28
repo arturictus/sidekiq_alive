@@ -12,6 +12,7 @@ GEM
     backport (1.2.0)
     benchmark (0.2.0)
     coderay (1.1.3)
+    concurrent-ruby (1.1.10)
     connection_pool (2.3.0)
     diff-lcs (1.5.0)
     e2mmap (0.1.0)
@@ -22,8 +23,6 @@ GEM
     kramdown-parser-gfm (1.1.0)
       kramdown (~> 2.0)
     method_source (1.0.0)
-    mock_redis (0.34.0)
-      ruby2_keywords
     nokogiri (1.13.8-aarch64-linux)
       racc (~> 1.4)
     nokogiri (1.13.8-arm64-darwin)
@@ -42,7 +41,8 @@ GEM
       rack (>= 1.3)
     rainbow (3.1.1)
     rake (13.0.6)
-    redis (4.8.0)
+    redis-client (0.10.0)
+      connection_pool
     regexp_parser (2.6.0)
     reverse_markdown (2.1.1)
       nokogiri
@@ -78,11 +78,11 @@ GEM
     rubocop-shopify (2.10.1)
       rubocop (~> 1.35)
     ruby-progressbar (1.11.0)
-    ruby2_keywords (0.0.5)
-    sidekiq (6.5.7)
-      connection_pool (>= 2.2.5)
-      rack (~> 2.0)
-      redis (>= 4.5.0, < 5)
+    sidekiq (7.0.0)
+      concurrent-ruby (< 2)
+      connection_pool (>= 2.3.0)
+      rack (>= 2.2.4)
+      redis-client (>= 0.9.0)
     solargraph (0.47.2)
       backport (~> 1.2)
       benchmark
@@ -112,9 +112,8 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (> 1.16)
-  mock_redis
   pry
-  rack-test
+  rack-test (~> 2.0.2)
   rake (~> 13.0)
   rspec (~> 3.0)
   rspec-sidekiq (~> 3.0)

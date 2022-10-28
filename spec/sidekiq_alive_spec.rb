@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "sidekiq/capsule"
+
 RSpec.describe(SidekiqAlive) do
   context "with configuration" do
     it "has a version number" do
@@ -76,14 +78,19 @@ RSpec.describe(SidekiqAlive) do
   end
 
   context "with redis" do
+    let(:sidekiq_config) { Sidekiq::Config.new }
+
     before do
-      allow(SidekiqAlive).to(receive(:redis).and_return(MockRedis.new))
       allow(Sidekiq).to(receive(:server?) { true })
-      allow(Sidekiq).to(receive(:on))
+      allow(Sidekiq).to(receive(:default_configuration) { sidekiq_config })
+
+      allow(sidekiq_config).to(receive(:queues).and_call_original)
+      allow(sidekiq_config).to(receive(:on))
     end
 
     it '::store_alive_key" stores key with the expected ttl' do
       redis = SidekiqAlive.redis
+
       expect(redis.ttl(SidekiqAlive.current_lifeness_key)).to(eq(-2))
       SidekiqAlive.store_alive_key
       expect(redis.ttl(SidekiqAlive.current_lifeness_key)).to(eq(SidekiqAlive.config.time_to_live))
@@ -108,11 +115,12 @@ RSpec.describe(SidekiqAlive) do
 
       before do
         allow(SidekiqAlive).to(receive(:fork) { 1 })
-        allow(Sidekiq).to(receive(:on).with(:startup) { |&arg| arg.call })
+        allow(sidekiq_config).to(receive(:on).with(:startup) { |&arg| arg.call })
       end
 
       it "::registered_instances" do
         SidekiqAlive.start
+
         expect(SidekiqAlive.registered_instances.count).to(eq(1))
         expect(SidekiqAlive.registered_instances.first).to(include("test-hostname"))
       end
@@ -120,7 +128,7 @@ RSpec.describe(SidekiqAlive) do
       it "::unregister_current_instance" do
         SidekiqAlive.start
 
-        expect(Sidekiq).to(have_received(:on).with(:quiet)) do |&arg|
+        expect(sidekiq_config).to(have_received(:on).with(:quiet)) do |&arg|
           arg.call
 
           expect(SidekiqAlive.registered_instances.count).to(eq(0))
@@ -132,7 +140,7 @@ RSpec.describe(SidekiqAlive) do
 
         SidekiqAlive.start
 
-        expect(Sidekiq[:queues].first).to(eq("#{queue_prefix}-test-hostname"))
+        expect(Sidekiq.default_configuration.queues.first).to(eq("#{queue_prefix}-test-hostname"))
       end
     end
   end

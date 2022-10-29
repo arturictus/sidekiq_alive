@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    sidekiq-alive-next (2.2.1)
+    sidekiq-alive-next (3.0.0)
       rack (>= 2.2.4, < 3)
       sidekiq (>= 7, < 8)
       webrick (>= 1, < 2)

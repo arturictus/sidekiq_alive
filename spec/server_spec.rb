@@ -11,7 +11,7 @@ RSpec.describe(SidekiqAlive::Server) do
   describe "#run!" do
     subject { app.run! }
 
-    before { allow(Rack::Handler).to(receive(:get).with("webrick").and_return(fake_webrick)) }
+    before { allow(Rackup::Handler).to(receive(:get).with("webrick").and_return(fake_webrick)) }
 
     let(:fake_webrick) { double }
 

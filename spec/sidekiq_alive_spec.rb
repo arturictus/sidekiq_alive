@@ -78,11 +78,10 @@ RSpec.describe(SidekiqAlive) do
   end
 
   context "with redis" do
-    let(:sidekiq_config) { Sidekiq::Config.new }
+    let(:sidekiq_config) { Sidekiq.default_configuration }
 
     before do
       allow(Sidekiq).to(receive(:server?) { true })
-      allow(Sidekiq).to(receive(:default_configuration) { sidekiq_config })
 
       allow(sidekiq_config).to(receive(:queues).and_call_original)
       allow(sidekiq_config).to(receive(:on))

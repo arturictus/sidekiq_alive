@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 require "rack"
+require "rackup"
 
 module SidekiqAlive
   class Server
     class << self
       def run!
-        handler = Rack::Handler.get(server)
+        handler = Rackup::Handler.get(server)
 
         Signal.trap("TERM") { handler.shutdown }
 

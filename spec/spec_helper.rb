@@ -4,11 +4,12 @@ require "bundler/setup"
 require "sidekiq-alive-next"
 require "rspec-sidekiq"
 require "rack/test"
-require "pry"
+require "debug"
 
 ENV["RACK_ENV"] = "test"
 ENV["HOSTNAME"] = "test-hostname"
-# initialize server
+
+Sidekiq.logger.level = Logger::ERROR
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -24,6 +25,5 @@ RSpec.configure do |config|
   config.before do
     SidekiqAlive.redis.flushall
     SidekiqAlive.config.set_defaults
-    SidekiqAlive.config.logger = Logger.new(IO::NULL)
   end
 end

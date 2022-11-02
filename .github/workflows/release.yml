@@ -23,7 +23,6 @@ jobs:
         name: Set up Ruby 3.1
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1.2
           bundler-cache: true
       -
         name: Update version

@@ -9,7 +9,7 @@ module SidekiqAlive
     SidekiqAlive::Worker.sidekiq_options queue: current_queue
     Sidekiq.configure_server do |sq_config|
 
-      sq_config[:queues].unshift(current_queue)
+      (sq_config.respond_to?(:[]) ? sq_config[:queues] : sq_config.options[:queues]).unshift(current_queue)
 
       sq_config.on(:startup) do
         SidekiqAlive.tap do |sa|

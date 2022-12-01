@@ -43,7 +43,7 @@ GEM
       webrick
     rainbow (3.1.1)
     rake (13.0.6)
-    redis-client (0.11.1)
+    redis-client (0.11.2)
       connection_pool
     regexp_parser (2.6.0)
     reline (0.3.1)
@@ -82,11 +82,11 @@ GEM
     rubocop-shopify (2.10.1)
       rubocop (~> 1.35)
     ruby-progressbar (1.11.0)
-    sidekiq (7.0.1)
+    sidekiq (7.0.2)
       concurrent-ruby (< 2)
       connection_pool (>= 2.3.0)
       rack (>= 2.2.4)
-      redis-client (>= 0.9.0)
+      redis-client (>= 0.11.0)
     solargraph (0.47.2)
       backport (~> 1.2)
       benchmark

@@ -51,7 +51,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency("solargraph", "~> 0.47.2")
 
   spec.add_dependency("rack", ">= 3", "< 4")
-  spec.add_dependency("rackup", "~> 0.2.2")
+  spec.add_dependency("rackup", ">= 0.2")
   spec.add_dependency("sidekiq", ">= 7", "< 8")
   spec.add_dependency("webrick", ">= 1", "< 2")
 end

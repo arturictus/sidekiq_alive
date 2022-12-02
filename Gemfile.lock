@@ -3,7 +3,7 @@ PATH
   specs:
     sidekiq-alive-next (3.1.0)
       rack (>= 3, < 4)
-      rackup (~> 0.2.2)
+      rackup (>= 0.2)
       sidekiq (>= 7, < 8)
       webrick (>= 1, < 2)
 

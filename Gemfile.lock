@@ -120,7 +120,7 @@ DEPENDENCIES
   rspec (~> 3.0)
   rspec-sidekiq (~> 3.0)
   rubocop-shopify (~> 2.10)
-  sidekiq-alive-next!
+  sidekiq_alive!
   solargraph (~> 0.47.2)
 
 BUNDLED WITH

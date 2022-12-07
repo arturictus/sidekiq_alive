@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "bundler/setup"
-require "sidekiq-alive-next"
+require "sidekiq_alive"
 require "rspec-sidekiq"
 require "rack/test"
 require "debug"

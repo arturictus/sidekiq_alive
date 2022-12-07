@@ -6,15 +6,15 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "sidekiq_alive/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "sidekiq-alive-next"
+  spec.name          = "sidekiq_alive"
   spec.authors       = ["Andrejs Cunskis", "Artur Pañach"]
-  spec.email         = ["andrejs.cunskis@gmail.com"]
+  spec.email         = ["andrejs.cunskis@gmail.com", "arturictus@gmail.com"]
 
   spec.version       = SidekiqAlive::VERSION
 
   spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
 
-  spec.homepage      = "https://github.com/andrcuns/sidekiq-alive"
+  spec.homepage      = "https://github.com/arturictus/sidekiq_alive"
   spec.summary       = "Liveness probe for sidekiq on Kubernetes deployments."
   spec.license       = "MIT"
   spec.description   = <<~DSC

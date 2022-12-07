@@ -12,9 +12,13 @@ module SidekiqAlive
       Sidekiq.configure_server do |sq_config|
         sq_config.on(:startup) do
           SidekiqAlive::Worker.sidekiq_options(queue: current_queue)
-          sq_config.queues.unshift(current_queue)
-
-          logger.info(startup_info)
+          if sq_config.respond_to?(:queues)
+            # For Sidekiq > 7 and above
+            sq_config.queues
+          else
+            # For Sidekiq < 7
+            sq_config.options[:queues]
+          end.unshift(current_queue)
 
           register_current_instance
           store_alive_key

@@ -20,6 +20,8 @@ module SidekiqAlive
             sq_config.options[:queues]
           end.unshift(current_queue)
 
+          logger.info(startup_info)
+
           register_current_instance
           store_alive_key
           SidekiqAlive::Worker.perform_async(hostname)

@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
-require "sidekiq/capsule"
+begin
+  # this is needed for spec to work with sidekiq >7
+  require "sidekiq/capsule"
+rescue LoadError # rubocop:disable Lint/SuppressedException
+end
 
 RSpec.describe(SidekiqAlive) do
   context "with configuration" do

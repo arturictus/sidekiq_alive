@@ -6,6 +6,8 @@ require "singleton"
 require "sidekiq_alive/version"
 require "sidekiq_alive/config"
 require "sidekiq_alive/helpers"
+require "sidekiq_alive/redis/client"
+require "sidekiq_alive/redis/client_adapter"
 
 module SidekiqAlive
   class << self
@@ -56,11 +58,11 @@ module SidekiqAlive
       # Delete any pending jobs for this instance
       logger.info(shutdown_info)
       purge_pending_jobs
-      redis.call("DEL", current_instance_register_key)
+      redis.delete(current_instance_register_key)
     end
 
     def registered_instances
-      redis.scan("MATCH", "#{config.registered_instance_key}::*").map { |key| key }
+      redis.match("#{config.registered_instance_key}::*")
     end
 
     def purge_pending_jobs
@@ -77,11 +79,11 @@ module SidekiqAlive
     end
 
     def store_alive_key
-      redis.call("SET", current_lifeness_key, Time.now.to_i, ex: config.time_to_live.to_i)
+      redis.set(current_lifeness_key, time: Time.now.to_i, ex: config.time_to_live.to_i)
     end
 
     def redis
-      Sidekiq.redis { |r| r }
+      @redis ||= Helpers.sidekiq_7 ? Redis::ClientAdapter.new : Redis::Client.new
     end
 
     def alive?
@@ -132,7 +134,7 @@ module SidekiqAlive
     end
 
     def register_instance(instance_name)
-      redis.call("SET", instance_name, Time.now.to_i, ex: config.registration_ttl.to_i)
+      redis.set(instance_name, time: Time.now.to_i, ex: config.registration_ttl.to_i)
     end
   end
 end

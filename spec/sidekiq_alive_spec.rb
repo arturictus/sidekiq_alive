@@ -93,9 +93,10 @@ RSpec.describe(SidekiqAlive) do
 
       if sidekiq_7
         allow(sq_config).to(receive(:queues).and_call_original)
+      elsif sq_config.respond_to?(:[])
+        allow(sq_config).to(receive(:[]).and_call_original)
       else
         allow(sq_config).to(receive(:options).and_call_original)
-        allow(sq_config).to(receive(:[]).and_call_original)
       end
     end
 

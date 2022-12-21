@@ -2,10 +2,10 @@
 
 module SidekiqAlive
   module Helpers
-    def sidekiq_7
-      Gem.loaded_specs["sidekiq"].version >= Gem::Version.new("7")
+    class << self
+      def sidekiq_7
+        Gem.loaded_specs["sidekiq"].version >= Gem::Version.new("7")
+      end
     end
-
-    module_function :sidekiq_7
   end
 end

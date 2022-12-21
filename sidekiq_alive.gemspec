@@ -3,9 +3,6 @@
 lib = File.expand_path("lib", __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-# allow testing multiple sidekiq version
-sidekiq_version_range = ENV["SIDEKIQ_VERSION_RANGE"] || "< 8"
-
 require "sidekiq_alive/version"
 
 Gem::Specification.new do |spec|
@@ -54,6 +51,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency("solargraph", "~> 0.47.2")
 
   spec.add_dependency("rack", "< 3")
-  spec.add_dependency("sidekiq", sidekiq_version_range)
+  spec.add_dependency("sidekiq", ">= 5", "< 8")
   spec.add_dependency("webrick", ">= 1", "< 2")
 end

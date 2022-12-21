@@ -27,8 +27,8 @@ jobs:
       -
         name: Update version
         run: |
-          git config user.name andrcuns
-          git config user.email andrejs.cunskis@gmail.com
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           bundle config unset deployment
           bundle exec rake "version[${{ inputs.version }}]" && git push
       -

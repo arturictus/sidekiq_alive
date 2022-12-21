@@ -82,13 +82,21 @@ RSpec.describe(SidekiqAlive) do
   end
 
   context "with redis" do
-    let(:sidekiq_config) { Sidekiq.default_configuration }
+    let(:sidekiq_7) { SidekiqAlive::Helpers.sidekiq_7 }
+    # Older versions of sidekiq yielded Sidekiq module as configuration object
+    # With sidekiq > 7, configuration is a separate class
+    let(:sq_config) { sidekiq_7 ? Sidekiq.default_configuration : Sidekiq }
 
     before do
       allow(Sidekiq).to(receive(:server?) { true })
+      allow(sq_config).to(receive(:on))
 
-      allow(sidekiq_config).to(receive(:queues).and_call_original)
-      allow(sidekiq_config).to(receive(:on))
+      if sidekiq_7
+        allow(sq_config).to(receive(:queues).and_call_original)
+      else
+        allow(sq_config).to(receive(:options).and_call_original)
+        allow(sq_config).to(receive(:[]).and_call_original)
+      end
     end
 
     it '::store_alive_key" stores key with the expected ttl' do
@@ -115,10 +123,11 @@ RSpec.describe(SidekiqAlive) do
 
     context "::start" do
       let(:queue_prefix) { :heathcheck }
+      let(:queues) { sidekiq_7 ? sq_config.queues : sq_config.options[:queues] }
 
       before do
         allow(SidekiqAlive).to(receive(:fork) { 1 })
-        allow(sidekiq_config).to(receive(:on).with(:startup) { |&arg| arg.call })
+        allow(sq_config).to(receive(:on).with(:startup) { |&arg| arg.call })
       end
 
       it "::registered_instances" do
@@ -131,7 +140,7 @@ RSpec.describe(SidekiqAlive) do
       it "::unregister_current_instance" do
         SidekiqAlive.start
 
-        expect(sidekiq_config).to(have_received(:on).with(:quiet)) do |&arg|
+        expect(sq_config).to(have_received(:on).with(:quiet)) do |&arg|
           arg.call
 
           expect(SidekiqAlive.registered_instances.count).to(eq(0))
@@ -143,7 +152,7 @@ RSpec.describe(SidekiqAlive) do
 
         SidekiqAlive.start
 
-        expect(Sidekiq.default_configuration.queues.first).to(eq("#{queue_prefix}-test-hostname"))
+        expect(queues.first).to(eq("#{queue_prefix}-test-hostname"))
       end
     end
   end

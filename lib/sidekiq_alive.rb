@@ -5,6 +5,7 @@ require "sidekiq/api"
 require "singleton"
 require "sidekiq_alive/version"
 require "sidekiq_alive/config"
+require "sidekiq_alive/helpers"
 
 module SidekiqAlive
   class << self
@@ -12,12 +13,10 @@ module SidekiqAlive
       Sidekiq.configure_server do |sq_config|
         sq_config.on(:startup) do
           SidekiqAlive::Worker.sidekiq_options(queue: current_queue)
-          if sq_config.respond_to?(:queues)
-            # For Sidekiq > 7 and above
+          if Helpers.sidekiq_7
             sq_config.queues
           else
-            # For Sidekiq < 7
-            sq_config.options[:queues]
+            sq_config.respond_to?(:[]) ? sq_config[:queues] : sq_config.options[:queues]
           end.unshift(current_queue)
 
           logger.info(startup_info)

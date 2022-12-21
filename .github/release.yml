@@ -1,9 +1,6 @@
 changelog:
   categories:
-    - title: '🚀 New Features'
-      labels:
-        - 'feature'
-    - title: '🔬 Improvements'
+    - title: '🚀 New feature or request'
       labels: 
         - 'enhancement'
     - title: '🐞 Bug Fixes'
@@ -12,12 +9,3 @@ changelog:
     - title: '📦 Dependency updates'
       labels: 
         - 'dependencies'
-    - title: '📄 Documentation updates'
-      labels: 
-        - 'documentation'
-    - title: '🧰 Maintenance'
-      labels: 
-        - 'maintenance'
-    - title: '👷 CI'
-      labels: 
-        - 'ci'

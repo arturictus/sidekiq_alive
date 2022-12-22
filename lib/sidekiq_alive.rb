@@ -1,168 +1,150 @@
-require 'sidekiq'
-require 'sidekiq/api'
-require 'singleton'
-require 'sidekiq_alive/version'
-require 'sidekiq_alive/config'
+# frozen_string_literal: true
+
+require "sidekiq"
+require "sidekiq/api"
+require "singleton"
+require "sidekiq_alive/version"
+require "sidekiq_alive/config"
+require "sidekiq_alive/helpers"
+require "sidekiq_alive/redis/client"
+require "sidekiq_alive/redis/client_adapter"
 
 module SidekiqAlive
-  def self.start
-    SidekiqAlive::Worker.sidekiq_options queue: current_queue
-    Sidekiq.configure_server do |sq_config|
+  class << self
+    def start
+      Sidekiq.configure_server do |sq_config|
+        sq_config.on(:startup) do
+          SidekiqAlive::Worker.sidekiq_options(queue: current_queue)
+          if Helpers.sidekiq_7
+            sq_config.queues
+          else
+            sq_config.respond_to?(:[]) ? sq_config[:queues] : sq_config.options[:queues]
+          end.unshift(current_queue)
 
-      (sq_config.respond_to?(:[]) ? sq_config[:queues] : sq_config.options[:queues]).unshift(current_queue)
+          logger.info(startup_info)
 
-      sq_config.on(:startup) do
-        SidekiqAlive.tap do |sa|
-          sa.logger.info(banner)
-          sa.register_current_instance
-          sa.store_alive_key
-          sa::Worker.perform_async(hostname)
-          @server_pid = fork do
-            sa::Server.run!
-          end
-          sa.logger.info(successful_startup_text)
+          register_current_instance
+          store_alive_key
+          SidekiqAlive::Worker.perform_async(hostname)
+          @server_pid = fork { SidekiqAlive::Server.run! }
+
+          logger.info(successful_startup_text)
+        end
+
+        sq_config.on(:quiet) do
+          unregister_current_instance
+          config.shutdown_callback.call
+        end
+
+        sq_config.on(:shutdown) do
+          Process.kill("TERM", @server_pid) unless @server_pid.nil?
+          Process.wait(@server_pid) unless @server_pid.nil?
+
+          unregister_current_instance
+          config.shutdown_callback.call
         end
       end
-
-      sq_config.on(:quiet) do
-        SidekiqAlive.unregister_current_instance
-      end
-
-      sq_config.on(:shutdown) do
-        Process.kill('TERM', @server_pid) unless @server_pid.nil?
-        Process.wait(@server_pid) unless @server_pid.nil?
-        SidekiqAlive.unregister_current_instance
-      end
     end
-  end
 
-  def self.current_queue
-    "#{config.queue_prefix}-#{hostname}"
-  end
-
-  def self.register_current_instance
-    register_instance(current_instance_register_key)
-  end
-
-  def self.unregister_current_instance
-    # Delete any pending jobs for this instance
-    logger.info(shutdown_info)
-    purge_pending_jobs
-    redis.del(current_instance_register_key)
-  end
-
-  def self.registered_instances
-    deep_scan("#{config.registered_instance_key}::*")
-  end
-
-  def self.deep_scan(keyword, keys = [], cursor = 0)
-    loop do
-      cursor, found_keys = SidekiqAlive.redis.scan(cursor, match: keyword, count: 1000)
-      keys += found_keys if found_keys
-      break if cursor.to_i == 0
+    def current_queue
+      "#{config.queue_prefix}-#{hostname}"
     end
-    keys
-  end
 
-  def self.purge_pending_jobs
-    # TODO:
-    # Sidekiq 6 allows better way to find scheduled jobs:
-    # https://github.com/mperham/sidekiq/wiki/API#scan
-    scheduled_set = Sidekiq::ScheduledSet.new
-    jobs = scheduled_set.select { |job| job.klass == 'SidekiqAlive::Worker' && job.queue == current_queue }
-    logger.info("[SidekiqAlive] Purging #{jobs.count} pending for #{hostname}")
-    jobs.each(&:delete)
-    logger.info("[SidekiqAlive] Removing queue #{current_queue}")
-    Sidekiq::Queue.new(current_queue).clear
-  end
+    def register_current_instance
+      register_instance(current_instance_register_key)
+    end
 
-  def self.current_instance_register_key
-    "#{config.registered_instance_key}::#{hostname}"
-  end
+    def unregister_current_instance
+      # Delete any pending jobs for this instance
+      logger.info(shutdown_info)
+      purge_pending_jobs
+      redis.delete(current_instance_register_key)
+    end
 
-  def self.store_alive_key
-    redis.set(current_lifeness_key,
-              Time.now.to_i,
-              ex: config.time_to_live.to_i)
-  end
+    def registered_instances
+      redis.match("#{config.registered_instance_key}::*")
+    end
 
-  def self.redis
-    Sidekiq.redis { |r| r }
-  end
+    def purge_pending_jobs
+      schedule_set = Sidekiq::ScheduledSet.new
+      jobs = if Helpers.sidekiq_5
+        schedule_set.select { |job| job.klass == "SidekiqAlive::Worker" && job.queue == current_queue }
+      else
+        schedule_set.scan('"class":"SidekiqAlive::Worker"')
+      end
+      logger.info("[SidekiqAlive] Purging #{jobs.count} pending for #{hostname}")
+      jobs.each(&:delete)
 
-  def self.alive?
-    redis.ttl(current_lifeness_key) != -2
-  end
+      logger.info("[SidekiqAlive] Removing queue #{current_queue}")
+      Sidekiq::Queue.new(current_queue).clear
+    end
 
-  # CONFIG ---------------------------------------
+    def current_instance_register_key
+      "#{config.registered_instance_key}::#{hostname}"
+    end
 
-  def self.setup
-    yield(config)
-  end
+    def store_alive_key
+      redis.set(current_lifeness_key, time: Time.now.to_i, ex: config.time_to_live.to_i)
+    end
 
-  def self.logger
-    Sidekiq.logger
-  end
+    def redis
+      @redis ||= Helpers.sidekiq_7 ? Redis::ClientAdapter.new : Redis::Client.new
+    end
 
-  def self.config
-    @config ||= SidekiqAlive::Config.instance
-  end
+    def alive?
+      redis.ttl(current_lifeness_key) != -2
+    end
 
-  def self.current_lifeness_key
-    "#{config.liveness_key}::#{hostname}"
-  end
+    # CONFIG ---------------------------------------
 
-  def self.hostname
-    ENV['HOSTNAME'] || 'HOSTNAME_NOT_SET'
-  end
+    def setup
+      yield(config)
+    end
 
-  def self.shutdown_info
-    <<~BANNER
+    def logger
+      config.logger || Sidekiq.logger
+    end
 
-    =================== Shutting down SidekiqAlive =================
+    def config
+      @config ||= SidekiqAlive::Config.instance
+    end
 
-    Hostname: #{hostname}
-    Liveness key: #{current_lifeness_key}
-    Current instance register key: #{current_instance_register_key}
+    def current_lifeness_key
+      "#{config.liveness_key}::#{hostname}"
+    end
 
-    BANNER
-  end
+    def hostname
+      ENV["HOSTNAME"] || "HOSTNAME_NOT_SET"
+    end
 
-  def self.banner
-    <<~BANNER
+    def shutdown_info
+      "Shutting down sidekiq-alive!"
+    end
 
-    =================== SidekiqAlive =================
+    def startup_info
+      info = {
+        hostname: hostname,
+        port: config.port,
+        ttl: config.time_to_live,
+        queue: current_queue,
+        liveness_key: current_lifeness_key,
+        register_key: current_instance_register_key,
+      }
 
-    Hostname: #{hostname}
-    Liveness key: #{current_lifeness_key}
-    Port: #{config.port}
-    Time to live: #{config.time_to_live}s
-    Current instance register key: #{current_instance_register_key}
-    Worker running on queue: #{@queue}
+      "Starting sidekiq-alive: #{info}"
+    end
 
+    def successful_startup_text
+      "Successfully started sidekiq-alive, registered instances: #{registered_instances.join("\n\s\s- ")}"
+    end
 
-    starting ...
-    BANNER
-  end
-
-  def self.successful_startup_text
-    <<~BANNER
-    Registered instances:
-
-    - #{registered_instances.join("\n\s\s- ")}
-
-    =================== SidekiqAlive Ready! =================
-    BANNER
-  end
-
-  def self.register_instance(instance_name)
-    redis.set(instance_name,
-              Time.now.to_i,
-              ex: config.registration_ttl.to_i)
+    def register_instance(instance_name)
+      redis.set(instance_name, time: Time.now.to_i, ex: config.registration_ttl.to_i)
+    end
   end
 end
 
-require 'sidekiq_alive/worker'
-require 'sidekiq_alive/server'
+require "sidekiq_alive/worker"
+require "sidekiq_alive/server"
 
-SidekiqAlive.start unless ENV.fetch('DISABLE_SIDEKIQ_ALIVE', '').casecmp("true") == 0
+SidekiqAlive.start unless ENV.fetch("DISABLE_SIDEKIQ_ALIVE", "").casecmp("true").zero?

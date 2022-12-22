@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "andrcuns"
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - andrcuns
+    labels:
+      - "ci"

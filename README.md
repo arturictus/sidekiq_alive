@@ -244,11 +244,19 @@ SidekiqAlive.setup do |config|
   #    require 'net/http'
   #    config.callback = proc { Net::HTTP.get("https://status.com/ping") }
 
+  # ==> Shutdown callback
+  # When sidekiq process is shutting down, you can perform some action, like cleaning up created queue
+  # default: proc {}
+  #
+  #    config.shutdown_callback = proc do
+  #      Sidekiq::Queue.all.find { |q| q.name == "#{queue_prefix}-#{SidekiqAlive.hostname}" }&.clear
+  #    end
+
   # ==> Queue Prefix
   # SidekiqAlive will run in a independent queue for each instance/replica
   # This queue name will be generated with: "#{queue_prefix}-#{hostname}.
   # You can customize the prefix here.
-  # default: :sidekiq_alive
+  # default: :sidekiq-alive
   #
   #    config.queue_prefix = :other
 

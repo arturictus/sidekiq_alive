@@ -1,0 +1,11 @@
+changelog:
+  categories:
+    - title: '🚀 New feature or request'
+      labels: 
+        - 'enhancement'
+    - title: '🐞 Bug Fixes'
+      labels: 
+        - 'bug'
+    - title: '📦 Dependency updates'
+      labels: 
+        - 'dependencies'

@@ -17,7 +17,6 @@ task :version, :new_version do |_, args|
     File.write(version_path, version_file.gsub(version, new_version))
   end
 
-  sh("bundle install")
-  sh("git add #{version_path} Gemfile.lock")
+  sh("git add #{version_path}")
   sh("git commit -m 'Update version to #{new_version}'")
 end

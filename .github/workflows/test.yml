@@ -64,7 +64,7 @@ jobs:
           filename: coverage/.last_run.json
 =======
           hide_branch_rate: true
-          filename: coverage/.resultset.json
+          filename: coverage/coverage.xml
 
 
 

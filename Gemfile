@@ -8,3 +8,6 @@ git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
 gemspec
 
 gem "sidekiq", ENV["SIDEKIQ_VERSION_RANGE"] || "< 8"
+
+gem "ruby-lsp", "~> 0.3.7", group: :development
+gem "simplecov", require: false, group: :test

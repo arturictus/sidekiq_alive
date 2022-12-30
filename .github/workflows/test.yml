@@ -60,4 +60,12 @@ jobs:
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           badge: true
+<<<<<<< HEAD
           filename: coverage/.last_run.json
+=======
+          hide_branch_rate: true
+          filename: coverage/.resultset.json
+
+
+
+>>>>>>> da3d841 (Save)

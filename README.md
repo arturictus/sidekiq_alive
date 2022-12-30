@@ -6,7 +6,7 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/arturictus/sidekiq-alive/badge.svg)](https://snyk.io/test/github/arturictus/sidekiq-alive)
 
 ---
-![build](https://github.com/arturictus/sidekiq_alive/actions/workflows/ruby.yml/badge.svg)
+![build](https://github.com/arturictus/sidekiq_alive/actions/workflows/test.yml/badge.svg)
 [![Maintainability](https://api.codeclimate.com/v1/badges/35c39124564ffeb0ce4e/maintainability)](https://codeclimate.com/github/arturictus/sidekiq_alive/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/35c39124564ffeb0ce4e/test_coverage)](https://codeclimate.com/github/arturictus/sidekiq_alive/test_coverage)
 

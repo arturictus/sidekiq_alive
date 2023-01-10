@@ -18,9 +18,11 @@ RSpec.describe(SidekiqAlive::Server) do
     it "runs the handler with sidekiq_alive logger, host and no access logs" do
       expect(fake_webrick).to(receive(:run).with(
         described_class,
-        hash_including(Logger: SidekiqAlive.logger,
-                       Host: "0.0.0.0",
-                       AccessLog: []),
+        hash_including(
+          Logger: SidekiqAlive.logger,
+          Host: "0.0.0.0",
+          AccessLog: [],
+        ),
       ))
 
       subject

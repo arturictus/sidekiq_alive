@@ -70,7 +70,7 @@ module SidekiqAlive
       jobs = if Helpers.sidekiq_5
         schedule_set.select { |job| job.klass == "SidekiqAlive::Worker" && job.queue == current_queue }
       else
-        schedule_set.scan('"class":"SidekiqAlive::Worker"')
+        schedule_set.scan('"class":"SidekiqAlive::Worker"').select { |job| job.queue == current_queue }
       end
       logger.info("[SidekiqAlive] Purging #{jobs.count} pending for #{hostname}")
       jobs.each(&:delete)

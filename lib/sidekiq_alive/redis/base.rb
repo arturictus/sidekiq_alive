@@ -3,11 +3,7 @@
 module SidekiqAlive
   module Redis
     class Base
-      def set_ttl(key, time:, ex:)
-        raise(NotImplementedError)
-      end
-
-      def set(key, val)
+      def set(...)
         raise(NotImplementedError)
       end
 
@@ -21,10 +17,6 @@ module SidekiqAlive
 
       def ttl(...)
         redis.ttl(...)
-      end
-
-      def flushall
-        redis.flushall
       end
 
       private

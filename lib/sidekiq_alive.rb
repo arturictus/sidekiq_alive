@@ -88,7 +88,7 @@ module SidekiqAlive
     end
 
     def store_alive_key
-      redis.set_ttl(current_lifeness_key, time: Time.now.to_i, ex: config.time_to_live.to_i)
+      redis.set(current_lifeness_key, time: Time.now.to_i, ex: config.time_to_live.to_i)
     end
 
     def redis
@@ -143,7 +143,7 @@ module SidekiqAlive
     end
 
     def register_instance(instance_name)
-      redis.set_ttl(instance_name, time: Time.now.to_i, ex: config.registration_ttl.to_i)
+      redis.set(instance_name, time: Time.now.to_i, ex: config.registration_ttl.to_i)
     end
   end
 end

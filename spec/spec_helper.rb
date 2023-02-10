@@ -23,7 +23,7 @@ RSpec.configure do |config|
   end
 
   config.before do
-    SidekiqAlive.redis.flushall
+    Sidekiq.redis(&:flushall)
     SidekiqAlive.config.set_defaults
   end
 end

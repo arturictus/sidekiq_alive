@@ -7,12 +7,8 @@ module SidekiqAlive
     # Wrapper for `redis` gem used by sidekiq < 7
     # https://github.com/redis/redis-rb
     class RedisGem < Base
-      def set_ttl(key, time:, ex:)
+      def set(key, time:, ex:)
         redis.set(key, time, ex: ex)
-      end
-
-      def set(key, val)
-        redis.set(key, val)
       end
 
       def get(key)

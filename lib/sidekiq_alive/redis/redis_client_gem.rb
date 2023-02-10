@@ -7,12 +7,8 @@ module SidekiqAlive
     # Wrapper for `redis-client` gem used by `sidekiq` > 7
     # https://github.com/redis-rb/redis-client
     class RedisClientGem < Base
-      def set_ttl(key, time:, ex:)
+      def set(key, time:, ex:)
         redis.call("SET", key, time, ex: ex)
-      end
-
-      def set(key, val)
-        redis.call("SET", key, val)
       end
 
       def get(key)

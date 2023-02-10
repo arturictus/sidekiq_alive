@@ -25,6 +25,7 @@ module SidekiqAlive
 
           register_current_instance
           store_alive_key
+          # Passing the hostname argument it's only for debugging enqueued jobs
           SidekiqAlive::Worker.perform_async(hostname)
           @server_pid = fork { SidekiqAlive::Server.run! }
 
@@ -83,8 +84,12 @@ module SidekiqAlive
       "#{config.registered_instance_key}::#{hostname}"
     end
 
+    def current_instance_registered?
+      redis.get(current_instance_register_key)
+    end
+
     def store_alive_key
-      redis.set(current_lifeness_key, time: Time.now.to_i, ex: config.time_to_live.to_i)
+      redis.set_ttl(current_lifeness_key, time: Time.now.to_i, ex: config.time_to_live.to_i)
     end
 
     def redis
@@ -135,11 +140,11 @@ module SidekiqAlive
     end
 
     def successful_startup_text
-      "Successfully started sidekiq-alive, registered instances: #{registered_instances.join("\n\s\s- ")}"
+      "Successfully started sidekiq-alive, register with key: #{current_instance_register_key}"
     end
 
     def register_instance(instance_name)
-      redis.set(instance_name, time: Time.now.to_i, ex: config.registration_ttl.to_i)
+      redis.set_ttl(instance_name, time: Time.now.to_i, ex: config.registration_ttl.to_i)
     end
   end
 end

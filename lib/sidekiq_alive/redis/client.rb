@@ -7,8 +7,16 @@ module SidekiqAlive
     # Wrapper for redis client used by sidekiq < 7
     #
     class Client < Base
-      def set(key, time:, ex:)
+      def set_ttl(key, time:, ex:)
         redis.set(key, time, ex: ex)
+      end
+
+      def set(key, val)
+        redis.set(key, val)
+      end
+
+      def get(key)
+        redis.get(key)
       end
 
       def match(key)

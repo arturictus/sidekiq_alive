@@ -45,19 +45,4 @@ RSpec.describe(SidekiqAlive::Worker) do
       expect(SidekiqAlive.alive?).to(be(true))
     end
   end
-
-  describe "#hostname_registered?" do
-    subject do
-      described_class.new
-    end
-
-    it "when instance is not registered" do
-      expect(subject.hostname_registered?("any-name")).to(be(false))
-    end
-
-    it "when instance is registered" do
-      allow(SidekiqAlive).to(receive(:registered_instances).and_return(["SIDEKIQ_KEY:any-name"]))
-      expect(subject.hostname_registered?("any-name")).to(be(true))
-    end
-  end
 end

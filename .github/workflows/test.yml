@@ -23,7 +23,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    # needs: rubocop
     strategy:
       fail-fast: false
       matrix:

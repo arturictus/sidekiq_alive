@@ -3,16 +3,20 @@
 module SidekiqAlive
   module Redis
     class Base
-      def set(key, time:, ex:)
-        raise("Implement me")
+      def set_ttl(key, time:, ex:)
+        raise(NotImplementedError)
+      end
+
+      def set(key, val)
+        raise(NotImplementedError)
       end
 
       def match(key)
-        raise("Implement me")
+        raise(NotImplementedError)
       end
 
       def delete(key)
-        raise("Implement me")
+        raise(NotImplementedError)
       end
 
       def ttl(...)

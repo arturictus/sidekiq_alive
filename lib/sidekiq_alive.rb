@@ -6,8 +6,7 @@ require "singleton"
 require "sidekiq_alive/version"
 require "sidekiq_alive/config"
 require "sidekiq_alive/helpers"
-require "sidekiq_alive/redis/client"
-require "sidekiq_alive/redis/client_adapter"
+require "sidekiq_alive/redis"
 
 module SidekiqAlive
   class << self
@@ -93,7 +92,7 @@ module SidekiqAlive
     end
 
     def redis
-      @redis ||= Helpers.sidekiq_7 ? Redis::ClientAdapter.new : Redis::Client.new
+      @redis ||= Redis.adapter
     end
 
     def alive?

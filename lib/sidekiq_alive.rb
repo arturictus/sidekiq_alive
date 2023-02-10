@@ -151,6 +151,4 @@ end
 require "sidekiq_alive/worker"
 require "sidekiq_alive/server"
 
-# rubocop:disable
 SidekiqAlive.start unless ENV.fetch("DISABLE_SIDEKIQ_ALIVE", "").casecmp("true").zero?
-# rubocop:enable

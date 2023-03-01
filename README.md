@@ -1,8 +1,10 @@
 # SidekiqAlive
 
-![build](https://github.com/arturictus/sidekiq_alive/actions/workflows/ruby.yml/badge.svg)
-[![Maintainability](https://api.codeclimate.com/v1/badges/35c39124564ffeb0ce4e/maintainability)](https://codeclimate.com/github/arturictus/sidekiq_alive/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/35c39124564ffeb0ce4e/test_coverage)](https://codeclimate.com/github/arturictus/sidekiq_alive/test_coverage)
+[![Gem Version](https://badge.fury.io/rb/sidekiq_alive.svg)](https://rubygems.org/gems/sidekiq_alive)
+[![Total Downloads](https://img.shields.io/gem/dt/sidekiq_alive?color=blue)](https://rubygems.org/gems/https://rubygems.org/gems/sidekiq_alive)
+![Workflow status](https://github.com/allure-framework/allure-ruby/workflows/Test/badge.svg)
+
+---
 
 SidekiqAlive offers a solution to add liveness probe for a Sidekiq instance deployed in Kubernetes.
 This library can be used to check sidekiq health outside kubernetes.

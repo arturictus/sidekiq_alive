@@ -20,9 +20,6 @@ jobs:
           cache-version: 1
       - name: Run lint
         run: bundle exec rubocop --color
-<<<<<<< HEAD
-
-=======
   coverage:
     runs-on: ubuntu-latest
     services:
@@ -66,9 +63,9 @@ jobs:
         with:
           recreate: true
           path: code-coverage-results.md
->>>>>>> 3eaf291 (Save)
   test:
     runs-on: ubuntu-latest
+    needs: rubocop
     strategy:
       fail-fast: false
       matrix:
@@ -102,8 +99,3 @@ jobs:
           SIDEKIQ_VERSION_RANGE: ${{ matrix.sidekiq-version }}
       - name: Run tests
         run: bundle exec rspec --force-color
-      - name: Code Coverage Summary
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          badge: true
-          filename: coverage/.last_run.json

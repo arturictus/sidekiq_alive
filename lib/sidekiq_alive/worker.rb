@@ -13,7 +13,7 @@ module SidekiqAlive
       # Writes the liveness in Redis
       write_living_probe
       # schedules next living probe
-      self.class.perform_in(config.time_to_live / 2)
+      self.class.perform_in(config.time_to_live / 2, current_hostname)
     end
 
     def write_living_probe

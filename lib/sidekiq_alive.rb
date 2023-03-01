@@ -6,8 +6,7 @@ require "singleton"
 require "sidekiq_alive/version"
 require "sidekiq_alive/config"
 require "sidekiq_alive/helpers"
-require "sidekiq_alive/redis/client"
-require "sidekiq_alive/redis/client_adapter"
+require "sidekiq_alive/redis"
 
 module SidekiqAlive
   class << self
@@ -25,6 +24,7 @@ module SidekiqAlive
 
           register_current_instance
           store_alive_key
+          # Passing the hostname argument it's only for debugging enqueued jobs
           SidekiqAlive::Worker.perform_async(hostname)
           @server_pid = fork { SidekiqAlive::Server.run! }
 
@@ -83,12 +83,16 @@ module SidekiqAlive
       "#{config.registered_instance_key}::#{hostname}"
     end
 
+    def current_instance_registered?
+      redis.get(current_instance_register_key)
+    end
+
     def store_alive_key
       redis.set(current_lifeness_key, time: Time.now.to_i, ex: config.time_to_live.to_i)
     end
 
     def redis
-      @redis ||= Helpers.sidekiq_7 ? Redis::ClientAdapter.new : Redis::Client.new
+      @redis ||= Redis.adapter
     end
 
     def alive?
@@ -135,7 +139,7 @@ module SidekiqAlive
     end
 
     def successful_startup_text
-      "Successfully started sidekiq-alive, registered instances: #{registered_instances.join("\n\s\s- ")}"
+      "Successfully started sidekiq-alive, registered with key: #{current_instance_register_key}"
     end
 
     def register_instance(instance_name)

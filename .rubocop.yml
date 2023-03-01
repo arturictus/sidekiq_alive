@@ -9,3 +9,7 @@ AllCops:
 Layout/ArgumentAlignment:
   Enabled: true
   EnforcedStyle: with_first_argument
+
+Style/InvertibleUnlessCondition:
+  Exclude:
+    - "lib/sidekiq_alive.rb"

@@ -36,7 +36,7 @@ module SidekiqAlive
     end
 
     def registration_ttl
-      @registration_ttl || time_to_live + 60
+      @registration_ttl || time_to_live * 3
     end
   end
 end

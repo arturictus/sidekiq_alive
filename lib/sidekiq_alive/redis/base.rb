@@ -3,24 +3,20 @@
 module SidekiqAlive
   module Redis
     class Base
-      def set(key, time:, ex:)
-        raise("Implement me")
+      def set(...)
+        raise(NotImplementedError)
       end
 
       def match(key)
-        raise("Implement me")
+        raise(NotImplementedError)
       end
 
       def delete(key)
-        raise("Implement me")
+        raise(NotImplementedError)
       end
 
       def ttl(...)
         redis.ttl(...)
-      end
-
-      def flushall
-        redis.flushall
       end
 
       private

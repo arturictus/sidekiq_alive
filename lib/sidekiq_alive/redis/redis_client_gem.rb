@@ -4,11 +4,15 @@ require_relative "base"
 
 module SidekiqAlive
   module Redis
-    # Wrapper for redis client adapter used by sidekiq > 7
-    #
-    class ClientAdapter < Base
+    # Wrapper for `redis-client` gem used by `sidekiq` > 7
+    # https://github.com/redis-rb/redis-client
+    class RedisClientGem < Base
       def set(key, time:, ex:)
         redis.call("SET", key, time, ex: ex)
+      end
+
+      def get(key)
+        redis.call("GET", key)
       end
 
       def match(key)

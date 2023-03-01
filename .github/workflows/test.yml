@@ -12,21 +12,17 @@ jobs:
   rubocop:
     runs-on: ubuntu-latest
     steps:
-      - 
-        uses: actions/checkout@v3
-      - 
-        name: Set up Ruby ${{ matrix.ruby-version }}
+      - uses: actions/checkout@v3
+      - name: Set up Ruby ${{ matrix.ruby-version }}
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
           cache-version: 1
-      - 
-        name: Run lint
+      - name: Run lint
         run: bundle exec rubocop --color
 
   test:
     runs-on: ubuntu-latest
-    needs: rubocop
     strategy:
       fail-fast: false
       matrix:
@@ -49,10 +45,8 @@ jobs:
           - 6379:6379
 
     steps:
-      - 
-        uses: actions/checkout@v3
-      - 
-        name: Set up Ruby ${{ matrix.ruby-version }} with Sidekiq ${{ matrix.sidekiq-version }}
+      - uses: actions/checkout@v3
+      - name: Set up Ruby ${{ matrix.ruby-version }} with Sidekiq ${{ matrix.sidekiq-version }}
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby-version }}
@@ -60,6 +54,5 @@ jobs:
           cache-version: 1
         env:
           SIDEKIQ_VERSION_RANGE: ${{ matrix.sidekiq-version }}
-      - 
-        name: Run tests
+      - name: Run tests
         run: bundle exec rspec --force-color

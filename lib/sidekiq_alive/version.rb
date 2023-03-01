@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module SidekiqAlive
-  VERSION = "v2.2.0"
+  VERSION = "2.1.9"
 end

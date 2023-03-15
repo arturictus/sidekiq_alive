@@ -251,7 +251,7 @@ SidekiqAlive.setup do |config|
   # default: proc {}
   #
   #    config.shutdown_callback = proc do
-  #      Sidekiq::Queue.all.find { |q| q.name == "#{queue_prefix}-#{SidekiqAlive.hostname}" }&.clear
+  #      Sidekiq::Queue.all.find { |q| q.name == "#{config.queue_prefix}-#{SidekiqAlive.hostname}" }&.clear
   #    end
 
   # ==> Queue Prefix

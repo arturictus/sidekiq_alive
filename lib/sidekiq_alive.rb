@@ -20,6 +20,11 @@ module SidekiqAlive
             sq_config.respond_to?(:[]) ? sq_config[:queues] : sq_config.options[:queues]
           end.unshift(current_queue)
 
+          # If no weight is set, webui might not show this queue for given instance/process.
+          if Helpers.sidekiq_7
+            sq_config.default_capsule.weights[current_queue] = 1
+          end
+
           logger.info(startup_info)
 
           register_current_instance

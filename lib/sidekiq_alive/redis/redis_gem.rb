@@ -30,6 +30,12 @@ module SidekiqAlive
       def delete(key)
         redis.del(key)
       end
+
+      private
+
+      def redis
+        Sidekiq.redis { |redis| redis }
+      end
     end
   end
 end

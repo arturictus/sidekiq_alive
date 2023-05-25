@@ -16,13 +16,7 @@ module SidekiqAlive
       end
 
       def ttl(...)
-        redis.ttl(...)
-      end
-
-      private
-
-      def redis
-        Sidekiq.redis { |r| r }
+        Sidekiq.redis { |redis| redis.ttl(...) }
       end
     end
   end

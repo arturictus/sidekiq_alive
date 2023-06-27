@@ -15,8 +15,20 @@ module SidekiqAlive
         Sidekiq.redis { |redis| redis.call("GET", key) }
       end
 
-      def match(key)
-        Sidekiq.redis { |redis| redis.scan("MATCH", key).map { |key| key } }
+      def zadd(set_key, ex, key)
+        Sidekiq.redis { |redis| redis.call("ZADD", set_key, ex, key) }
+      end
+
+      def zrange(set_key, start, stop)
+        Sidekiq.redis { |redis| redis.call("ZRANGE", set_key, start, stop) }
+      end
+
+      def zrangebyscore(set_key, min, max)
+        Sidekiq.redis { |redis| redis.call("ZRANGEBYSCORE", set_key, min, max) }
+      end
+
+      def zrem(set_key, key)
+        Sidekiq.redis { |redis| redis.call("ZREM", set_key, key) }
       end
 
       def delete(key)

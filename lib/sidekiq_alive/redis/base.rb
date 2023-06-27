@@ -7,7 +7,19 @@ module SidekiqAlive
         raise(NotImplementedError)
       end
 
-      def match(key)
+      def zadd(set_key, ex, key)
+        raise(NotImplementedError)
+      end
+
+      def zrange(set_key, start, stop)
+        raise(NotImplementedError)
+      end
+
+      def zrangebyscore(set_key, min, max)
+        raise(NotImplementedError)
+      end
+
+      def zrem(set_key, key)
         raise(NotImplementedError)
       end
 

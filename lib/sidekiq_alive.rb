@@ -8,6 +8,8 @@ require "sidekiq_alive/config"
 require "sidekiq_alive/helpers"
 require "sidekiq_alive/redis"
 
+SIDEKIQ_ALIVE_INDEX_NAME = "sidekiq-alive-index"
+
 module SidekiqAlive
   class << self
     def start
@@ -28,6 +30,7 @@ module SidekiqAlive
           logger.info(startup_info)
 
           register_current_instance
+
           store_alive_key
           # Passing the hostname argument it's only for debugging enqueued jobs
           SidekiqAlive::Worker.perform_async(hostname)
@@ -63,11 +66,13 @@ module SidekiqAlive
       # Delete any pending jobs for this instance
       logger.info(shutdown_info)
       purge_pending_jobs
-      redis.delete(current_instance_register_key)
+      redis.zrem(SIDEKIQ_ALIVE_INDEX_NAME, current_instance_register_key)
     end
 
     def registered_instances
-      redis.match("#{config.registered_instance_key}::*")
+      # before we return we make sure we expire old keys
+      expire_old_keys
+      redis.zrange(SIDEKIQ_ALIVE_INDEX_NAME, 0, -1)
     end
 
     def purge_pending_jobs
@@ -136,6 +141,7 @@ module SidekiqAlive
         port: config.port,
         ttl: config.time_to_live,
         queue: current_queue,
+        register_set: SIDEKIQ_ALIVE_INDEX_NAME,
         liveness_key: current_lifeness_key,
         register_key: current_instance_register_key,
       }
@@ -144,11 +150,21 @@ module SidekiqAlive
     end
 
     def successful_startup_text
-      "Successfully started sidekiq-alive, registered with key: #{current_instance_register_key}"
+      "Successfully started sidekiq-alive, registered with key: "\
+        "#{current_instance_register_key} on set #{SIDEKIQ_ALIVE_INDEX_NAME}"
+    end
+
+    def expire_old_keys
+      # we get every key that should be expired by now
+      keys_to_expire = redis.zrangebyscore(SIDEKIQ_ALIVE_INDEX_NAME, 0, Time.now.to_i)
+      # then we remove it
+      keys_to_expire.each { |key| redis.zrem(SIDEKIQ_ALIVE_INDEX_NAME, key) }
     end
 
     def register_instance(instance_name)
-      redis.set(instance_name, time: Time.now.to_i, ex: config.registration_ttl.to_i)
+      expiration = Time.now.to_i + config.registration_ttl.to_i
+      redis.zadd(SIDEKIQ_ALIVE_INDEX_NAME, expiration, instance_name)
+      expire_old_keys
     end
   end
 end

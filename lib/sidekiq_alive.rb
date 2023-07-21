@@ -8,7 +8,6 @@ require "sidekiq_alive/config"
 require "sidekiq_alive/helpers"
 require "sidekiq_alive/redis"
 
-
 module SidekiqAlive
   HOSTNAME_REGISTRY = "sidekiq-alive-hostnames"
   class << self

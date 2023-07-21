@@ -15,16 +15,20 @@ module SidekiqAlive
         redis.get(key)
       end
 
-      def match(key)
-        keys = []
-        cursor = 0
+      def zadd(set_key, ex, key)
+        redis.zadd(set_key, ex, key)
+      end
 
-        loop do
-          cursor, found_keys = redis.scan(cursor, match: key, count: 1000)
-          keys += found_keys if found_keys
-          break if cursor.to_i == 0
-        end
-        keys
+      def zrange(set_key, start, stop)
+        redis.zrange(set_key, start, stop)
+      end
+
+      def zrangebyscore(set_key, min, max)
+        redis.zrangebyscore(set_key, min, max)
+      end
+
+      def zrem(set_key, key)
+        redis.zrem(set_key, key)
       end
 
       def delete(key)

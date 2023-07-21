@@ -133,7 +133,6 @@ RSpec.describe(SidekiqAlive) do
 
       it "::registered_instances" do
         SidekiqAlive.start
-
         expect(SidekiqAlive.registered_instances.count).to(eq(1))
         expect(SidekiqAlive.registered_instances.first).to(include("test-hostname"))
       end

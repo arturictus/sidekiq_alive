@@ -22,6 +22,7 @@ module SidekiqAlive
 
           # If no weight is set, webui might not show this queue for given instance/process.
           if Helpers.sidekiq_7
+            debugger
             sq_config.default_capsule.weights[current_queue] = 1
           end
 

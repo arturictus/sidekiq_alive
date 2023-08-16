@@ -46,7 +46,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency("rack-test", "~> 2.1.0")
   spec.add_development_dependency("rake", "~> 13.0")
   spec.add_development_dependency("rspec", "~> 3.0")
-  spec.add_development_dependency("rspec-sidekiq", "~> 3.0")
+  spec.add_development_dependency("rspec-sidekiq", "~> 4.0")
   spec.add_development_dependency("rubocop-shopify", "~> 2.10")
   spec.add_development_dependency("solargraph", "~> 0.49.0")
 

@@ -28,7 +28,7 @@ module SidekiqAlive
       end
 
       def ttl(...)
-        Sidekiq.redis { |redis| redis.ttl(...) }
+        redis { |r| r.ttl(...) }
       end
     end
   end

@@ -20,7 +20,7 @@ module SidekiqAlive
 
           if Helpers.sidekiq_7
             sq_config.capsule(CAPSULE_NAME) do |cap|
-              cap.concurrency = 1
+              cap.concurrency = 2
               cap.queues = [current_queue]
             end
           else

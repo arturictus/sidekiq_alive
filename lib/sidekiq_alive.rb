@@ -10,20 +10,21 @@ require "sidekiq_alive/redis"
 
 module SidekiqAlive
   HOSTNAME_REGISTRY = "sidekiq-alive-hostnames"
+  CAPSULE_NAME = "sidekiq-alive"
+
   class << self
     def start
       Sidekiq.configure_server do |sq_config|
         sq_config.on(:startup) do
           SidekiqAlive::Worker.sidekiq_options(queue: current_queue)
-          if Helpers.sidekiq_7
-            sq_config.queues
-          else
-            sq_config.respond_to?(:[]) ? sq_config[:queues] : sq_config.options[:queues]
-          end.unshift(current_queue)
 
-          # If no weight is set, webui might not show this queue for given instance/process.
           if Helpers.sidekiq_7
-            sq_config.default_capsule.weights[current_queue] = 1
+            sq_config.capsule(CAPSULE_NAME) do |cap|
+              cap.concurrency = 2
+              cap.queues = [current_queue]
+            end
+          else
+            (sq_config.respond_to?(:[]) ? sq_config[:queues] : sq_config.options[:queues]).unshift(current_queue)
           end
 
           logger.info(startup_info)

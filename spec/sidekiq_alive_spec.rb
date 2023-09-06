@@ -92,7 +92,7 @@ RSpec.describe(SidekiqAlive) do
       allow(sq_config).to(receive(:on))
 
       if sidekiq_7
-        allow(sq_config).to(receive(:queues).and_call_original)
+        allow(sq_config).to(receive(:capsule).and_call_original)
       elsif sq_config.respond_to?(:[])
         allow(sq_config).to(receive(:[]).and_call_original)
       else
@@ -124,11 +124,17 @@ RSpec.describe(SidekiqAlive) do
 
     context "::start" do
       let(:queue_prefix) { :heathcheck }
-      let(:queues) { sidekiq_7 ? sq_config.queues : sq_config.options[:queues] }
+      let(:queues) do
+        next Sidekiq.default_configuration.capsules[SidekiqAlive::CAPSULE_NAME].queues if sidekiq_7
+
+        sq_config.options[:queues]
+      end
 
       before do
         allow(SidekiqAlive).to(receive(:fork) { 1 })
         allow(sq_config).to(receive(:on).with(:startup) { |&arg| arg.call })
+
+        SidekiqAlive.instance_variable_set(:@redis, nil)
       end
 
       it "::registered_instances" do

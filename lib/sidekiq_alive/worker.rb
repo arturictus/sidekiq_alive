@@ -3,7 +3,7 @@
 module SidekiqAlive
   class Worker
     include Sidekiq::Worker
-    sidekiq_options retry: false
+    sidekiq_options retry: true
 
     # Passing the hostname argument it's only for debugging enqueued jobs
     def perform(_hostname = SidekiqAlive.hostname)

@@ -50,7 +50,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency("rubocop-shopify", "~> 2.10")
   spec.add_development_dependency("solargraph", "~> 0.49.0")
 
-  spec.add_dependency("rack", "< 3")
+  spec.add_dependency("rack", ">= 2.2.4")
+  spec.add_dependency("rackup")
   spec.add_dependency("sidekiq", ">= 5", "< 8")
   spec.add_dependency("webrick", ">= 1", "< 2")
 end

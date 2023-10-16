@@ -268,6 +268,14 @@ SidekiqAlive.setup do |config|
   # default: 'webrick'
   #
   #    config.server = 'puma'
+
+  # ==> Concurrency
+  # The maximum number of Redis connections requested for the SidekiqAlive pool.
+  # Can also be set with the environment variable SIDEKIQ_ALIVE_CONCURRENCY.
+  # NOTE: only effects Sidekiq 7 or greater.
+  # default: 2
+  #
+  #    config.concurrency = 3
 end
 ```
 

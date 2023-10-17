@@ -15,7 +15,8 @@ module SidekiqAlive
                   :server,
                   :custom_liveness_probe,
                   :logger,
-                  :shutdown_callback
+                  :shutdown_callback,
+                  :concurrency
 
     def initialize
       set_defaults
@@ -33,6 +34,7 @@ module SidekiqAlive
       @server = ENV.fetch("SIDEKIQ_ALIVE_SERVER", "webrick")
       @custom_liveness_probe = proc { true }
       @shutdown_callback = proc {}
+      @concurrency = Integer(ENV.fetch("SIDEKIQ_ALIVE_CONCURRENCY", 2), exception: false) || 2
     end
 
     def registration_ttl

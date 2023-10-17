@@ -48,6 +48,16 @@ RSpec.describe(SidekiqAlive) do
       ENV["SIDEKIQ_ALIVE_PORT"] = nil
     end
 
+    it "configures the concurrency from the SIDEKIQ_ALIVE_CONCURRENCY ENV var" do
+      ENV["SIDEKIQ_ALIVE_CONCURRENCY"] = "3"
+
+      SidekiqAlive.config.set_defaults
+
+      expect(described_class.config.concurrency).to(eq(3))
+
+      ENV["SIDEKIQ_ALIVE_CONCURRENCY"] = nil
+    end
+
     it "configurations behave as expected" do
       k = described_class.config
 

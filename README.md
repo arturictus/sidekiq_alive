@@ -247,10 +247,17 @@ SidekiqAlive.setup do |config|
   #    config.callback = proc { Net::HTTP.get("https://status.com/ping") }
 
   # ==> Shutdown callback
-  # When sidekiq process is shutting down, you can perform some action, like cleaning up created queue
-  # default: proc {}
+  # When sidekiq process is shutting down, you can perform some action.
+  # Note that if you override the default, which cleans up the created queue, you probably will want to add
+  # doing that at the end of your code.
+  # default: proc do
+  #   Sidekiq::Queue.all.find { |q| q.name == "#{config.queue_prefix}-#{SidekiqAlive.hostname}" }&.clear
+  # end
   #
   #    config.shutdown_callback = proc do
+  #      # do something, i.e.:
+  #      bump_metrics_of_no_of_cleaned_queues
+  #      # ...and clean the created queue at the end
   #      Sidekiq::Queue.all.find { |q| q.name == "#{config.queue_prefix}-#{SidekiqAlive.hostname}" }&.clear
   #    end
 

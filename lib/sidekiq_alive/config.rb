@@ -33,7 +33,9 @@ module SidekiqAlive
       @queue_prefix = :"sidekiq-alive"
       @server = ENV.fetch("SIDEKIQ_ALIVE_SERVER", "webrick")
       @custom_liveness_probe = proc { true }
-      @shutdown_callback = proc {}
+      @shutdown_callback = proc do
+        Sidekiq::Queue.all.find { |q| q.name == "#{@queue_prefix}-#{SidekiqAlive.hostname}" }&.clear
+      end
       @concurrency = Integer(ENV.fetch("SIDEKIQ_ALIVE_CONCURRENCY", 2), exception: false) || 2
     end
 

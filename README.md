@@ -262,13 +262,6 @@ SidekiqAlive.setup do |config|
   #
   #    config.queue_prefix = :other
 
-  # ==> Rack server
-  # Web server used to serve an HTTP response.
-  # Can also be set with the environment variable SIDEKIQ_ALIVE_SERVER.
-  # default: 'webrick'
-  #
-  #    config.server = 'puma'
-
   # ==> Concurrency
   # The maximum number of Redis connections requested for the SidekiqAlive pool.
   # Can also be set with the environment variable SIDEKIQ_ALIVE_CONCURRENCY.

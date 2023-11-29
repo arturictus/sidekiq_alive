@@ -8,13 +8,11 @@ SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
 require "bundler/setup"
 require "sidekiq_alive"
 require "rspec-sidekiq"
-require "rack/test"
 require "debug"
 
-ENV["RACK_ENV"] = "test"
 ENV["HOSTNAME"] = "test-hostname"
 
-Sidekiq.logger.level = Logger::ERROR
+Sidekiq.logger.level = Logger::FATAL
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

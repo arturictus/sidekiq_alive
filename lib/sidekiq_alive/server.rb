@@ -1,16 +1,20 @@
 # frozen_string_literal: true
 
-require "rack"
+require_relative "http_server"
 
 module SidekiqAlive
-  class Server
+  class Server < HttpServer
     class << self
       def run!
-        handler = Rack::Handler.get(server)
+        server = new(port, host, path)
 
-        Signal.trap("TERM") { handler.shutdown }
+        Signal.trap("TERM") do
+          SidekiqAlive.logger.info("Shutting down SidekiqAlive web server")
+          server.stop
+        end
 
-        handler.run(self, Port: port, Host: host, AccessLog: [], Logger: SidekiqAlive.logger)
+        SidekiqAlive.logger.info("Starting SidekiqAlive web server on #{host}:#{port}")
+        server.start
       end
 
       def host
@@ -18,28 +22,37 @@ module SidekiqAlive
       end
 
       def port
-        SidekiqAlive.config.port
+        SidekiqAlive.config.port.to_i
       end
 
       def path
         SidekiqAlive.config.path
       end
+    end
 
-      def server
-        SidekiqAlive.config.server
-      end
+    def initialize(port, host, path, logger = SidekiqAlive.logger)
+      super(self, port, host, logger)
 
-      def call(env)
-        if Rack::Request.new(env).path != path
-          [404, {}, ["Not found"]]
-        elsif SidekiqAlive.alive?
-          [200, {}, ["Alive!"]]
-        else
-          response = "Can't find the alive key"
-          SidekiqAlive.logger.error(response)
-          [404, {}, [response]]
-        end
+      @path = path
+    end
+
+    def request_handler(req, res)
+      if req.path != path
+        res.status = 404
+        res.body = "Not found"
+      elsif SidekiqAlive.alive?
+        res.status = 200
+        res.body = "Alive!"
+      else
+        response = "Can't find the alive key"
+        res.status = 404
+        res.body = response
+        SidekiqAlive.logger.error(response)
       end
     end
+
+    private
+
+    attr_reader :path
   end
 end

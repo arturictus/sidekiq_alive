@@ -12,7 +12,6 @@ module SidekiqAlive
                   :callback,
                   :registered_instance_key,
                   :queue_prefix,
-                  :server,
                   :custom_liveness_probe,
                   :logger,
                   :shutdown_callback,
@@ -31,7 +30,6 @@ module SidekiqAlive
       @callback = proc {}
       @registered_instance_key = "SIDEKIQ_REGISTERED_INSTANCE"
       @queue_prefix = :"sidekiq-alive"
-      @server = ENV.fetch("SIDEKIQ_ALIVE_SERVER", "webrick")
       @custom_liveness_probe = proc { true }
       @shutdown_callback = proc {}
       @concurrency = Integer(ENV.fetch("SIDEKIQ_ALIVE_CONCURRENCY", 2), exception: false) || 2

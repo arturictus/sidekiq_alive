@@ -14,8 +14,14 @@ gem "ruby-lsp", "~> 0.5.1", group: :development
 group :test do
   gem "simplecov", require: false
   gem "simplecov-cobertura"
-  # used for testing compatibility with rack based web server
-  gem "webrick", "< 2"
-  gem "rack", "< 3"
+
+  # used for testing rack based server
   gem "rack-test", "~> 2.1.0"
+  # rackup is not compatible with sidekiq < 7 due to rack version requirement
+  if ENV["WITH_RACKUP"] == "true" && ["7", "8"].any? { |range| ENV["SIDEKIQ_VERSION_RANGE"].include?(range) }
+    gem "rackup", "~> 2.1.0"
+  else
+    gem "rack", "< 3"
+    gem "webrick", "< 2"
+  end
 end

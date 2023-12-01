@@ -87,7 +87,6 @@ jobs:
         ports:
           # Maps port 6379 on service container to the host
           - 6379:6379
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up Ruby ${{ matrix.ruby-version }} with Sidekiq ${{ matrix.sidekiq-version }}
@@ -101,3 +100,6 @@ jobs:
           WITH_RACKUP: ${{ matrix.with-rackup }}
       - name: Run tests
         run: bundle exec rspec --force-color
+        env:
+          SIDEKIQ_VERSION_RANGE: ${{ matrix.sidekiq-version }}
+          WITH_RACKUP: ${{ matrix.with-rackup }}

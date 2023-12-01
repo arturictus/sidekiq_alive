@@ -34,7 +34,7 @@ module SidekiqAlive
           store_alive_key
           # Passing the hostname argument it's only for debugging enqueued jobs
           SidekiqAlive::Worker.perform_async(hostname)
-          @server_pid = fork { SidekiqAlive::Server.run! }
+          @server_pid = SidekiqAlive::Server.run!
 
           logger.info(successful_startup_text)
         end

@@ -141,7 +141,7 @@ RSpec.describe(SidekiqAlive) do
       end
 
       before do
-        allow(SidekiqAlive).to(receive(:fork) { 1 })
+        allow(SidekiqAlive::Server).to(receive(:run!) { 1 })
         allow(sq_config).to(receive(:on).with(:startup) { |&arg| arg.call })
 
         SidekiqAlive.instance_variable_set(:@redis, nil)

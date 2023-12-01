@@ -16,6 +16,8 @@ module SidekiqAlive
 
           SidekiqAlive.logger.info("Starting SidekiqAlive web server on #{host}:#{port}")
           server.start
+
+          nil
         end
 
         def host

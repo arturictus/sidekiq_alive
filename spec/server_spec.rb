@@ -49,6 +49,7 @@ RSpec.describe(SidekiqAlive::Server) do
       SidekiqAlive.config.set_defaults
 
       allow(Rack::Handler).to(receive(:get).and_return(fake_server))
+      allow(SidekiqAlive::Server::Rack).to(receive(:fork).and_yield)
     end
 
     after { ENV["SIDEKIQ_ALIVE_SERVER"] = nil }

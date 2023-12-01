@@ -9,6 +9,7 @@ require "bundler/setup"
 require "sidekiq_alive"
 require "rspec-sidekiq"
 require "debug"
+require "rack"
 
 ENV["HOSTNAME"] = "test-hostname"
 
@@ -25,7 +26,7 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  config.before do
+  config.prepend_before do
     Sidekiq.redis(&:flushall)
     SidekiqAlive.config.set_defaults
   end

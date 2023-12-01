@@ -1,94 +1,78 @@
 # frozen_string_literal: true
 
-require "net/http"
+around_config = proc do |example|
+  ENV["SIDEKIQ_ALIVE_HOST"] = "1.2.3.4"
+  ENV["SIDEKIQ_ALIVE_PORT"] = "4567"
+  ENV["SIDEKIQ_ALIVE_PATH"] = "/health"
+  SidekiqAlive.config.set_defaults
 
-RSpec.shared_context("with http server") do
-  let(:port) { 7433 }
-  let(:path) { "/" }
-  let(:server) { SidekiqAlive::Server.new(port, "0.0.0.0", path) }
+  example.run
 
-  before { server.start }
-  after { server.stop }
-
-  def get(uri)
-    @last_response = Net::HTTP.get_response(URI("http://localhost:#{port}#{uri}"))
-  end
-
-  attr_reader :last_response
+  ENV["SIDEKIQ_ALIVE_HOST"] = nil
+  ENV["SIDEKIQ_ALIVE_PORT"] = nil
+  ENV["SIDEKIQ_ALIVE_PATH"] = nil
 end
 
 RSpec.describe(SidekiqAlive::Server) do
   subject(:app) { described_class }
 
-  describe "#run!" do
-    let(:fake_server) { instance_double(SidekiqAlive::Server, start: nil) }
+  context "with default server" do
+    let(:fake_server) { instance_double(SidekiqAlive::Server::Default, start: nil) }
 
-    before { allow(SidekiqAlive::Server).to(receive(:new).and_return(fake_server)) }
+    before { allow(SidekiqAlive::Server::Default).to(receive(:new).and_return(fake_server)) }
 
-    it "starts server with default arguments" do
-      app.run!
+    context "with default config" do
+      it "starts server with default arguments" do
+        app.run!
 
-      expect(SidekiqAlive::Server).to(have_received(:new).with(7433, "0.0.0.0", "/"))
-      expect(fake_server).to(have_received(:start))
+        expect(SidekiqAlive::Server::Default).to(have_received(:new).with(7433, "0.0.0.0", "/"))
+        expect(fake_server).to(have_received(:start))
+      end
     end
 
     context "with changed host, port and path configuration" do
-      around do |example|
-        ENV["SIDEKIQ_ALIVE_HOST"] = "1.2.3.4"
-        ENV["SIDEKIQ_ALIVE_PORT"] = "4567"
-        ENV["SIDEKIQ_ALIVE_PATH"] = "/health"
-        SidekiqAlive.config.set_defaults
+      around(&around_config)
 
-        example.run
-
-        ENV["SIDEKIQ_ALIVE_HOST"] = nil
-        ENV["SIDEKIQ_ALIVE_PORT"] = nil
-        ENV["SIDEKIQ_ALIVE_PATH"] = nil
-      end
-
-      it "respects the SIDEKIQ_ALIVE_HOST environment variable" do
+      it "starts with updated configuration" do
         app.run!
 
-        expect(SidekiqAlive::Server).to(have_received(:new).with(4567, "1.2.3.4", "/health"))
+        expect(SidekiqAlive::Server::Default).to(have_received(:new).with(4567, "1.2.3.4", "/health"))
       end
     end
   end
 
-  describe "responses" do
-    include_context("with http server")
+  context "rack based server" do
+    let(:fake_server) { double("rack server", run: nil) }
 
-    context "with default configuration" do
-      it "responds with success when the service is alive" do
-        allow(SidekiqAlive).to(receive(:alive?) { true })
+    before do
+      ENV["SIDEKIQ_ALIVE_SERVER"] = "webrick"
+      SidekiqAlive.config.set_defaults
 
-        get "/"
-        expect(last_response.code).to(eq("200"))
-        expect(last_response.body).to(eq("Alive!"))
-      end
+      allow(Rack::Handler).to(receive(:get).and_return(fake_server))
+    end
 
-      it "responds with an error when the service is not alive" do
-        allow(SidekiqAlive).to(receive(:alive?) { false })
+    after { ENV["SIDEKIQ_ALIVE_SERVER"] = nil }
 
-        get "/"
-        expect(last_response.code).to(eq("404"))
-        expect(last_response.body).to(eq("Can't find the alive key"))
-      end
+    context "with default config" do
+      it "starts server with default arguments" do
+        app.run!
 
-      it "responds not found on an unknown path" do
-        get "/unknown-path"
-        expect(last_response.code).to(eq("404"))
-        expect(last_response.body).to(eq("Not found"))
+        expect(Rack::Handler).to(have_received(:get).with("webrick"))
+        expect(fake_server).to(have_received(:run).with(
+          SidekiqAlive::Server::Rack, Port: 7433, Host: "0.0.0.0", AccessLog: [], Logger: SidekiqAlive.logger
+        ))
       end
     end
 
-    context "with custom path" do
-      let(:path) { "/sidekiq-probe" }
+    context "with changed host, port and path configuration" do
+      around(&around_config)
 
-      it "responds ok to the given path" do
-        allow(SidekiqAlive).to(receive(:alive?) { true })
+      it "starts with updated configuration" do
+        app.run!
 
-        get "/sidekiq-probe"
-        expect(last_response.code).to(eq("200"))
+        expect(fake_server).to(have_received(:run).with(
+          SidekiqAlive::Server::Rack, Port: 4567, Host: "1.2.3.4", AccessLog: [], Logger: SidekiqAlive.logger
+        ))
       end
     end
   end

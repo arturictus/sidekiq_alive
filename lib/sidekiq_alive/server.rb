@@ -1,58 +1,41 @@
 # frozen_string_literal: true
 
-require_relative "http_server"
-
 module SidekiqAlive
-  class Server < HttpServer
+  module Server
     class << self
       def run!
-        server = new(port, host, path)
+        server.run!
+      end
 
-        Signal.trap("TERM") do
-          SidekiqAlive.logger.info("Shutting down SidekiqAlive web server")
-          server.stop
+      private
+
+      def server
+        use_rack? ? Rack : Default
+      end
+
+      def use_rack?
+        return false unless SidekiqAlive.config.server
+
+        require "rack"
+
+        # TODO: Add implementation for rackup (rack version >= 3)
+        if Gem.loaded_specs["rack"].version < Gem::Version.new("3")
+          true
+        else
+          logger.warn("Rack server option only supports rack version < 3, using default server")
+          false
         end
-
-        SidekiqAlive.logger.info("Starting SidekiqAlive web server on #{host}:#{port}")
-        server.start
+      rescue LoadError # extra check in case sidekiq removes rack runtime dependency in the future
+        logger.warn("Rack is not present in project dependencies, using default server")
+        false
       end
 
-      def host
-        SidekiqAlive.config.host
-      end
-
-      def port
-        SidekiqAlive.config.port.to_i
-      end
-
-      def path
-        SidekiqAlive.config.path
+      def logger
+        SidekiqAlive.logger
       end
     end
-
-    def initialize(port, host, path, logger = SidekiqAlive.logger)
-      super(self, port, host, logger)
-
-      @path = path
-    end
-
-    def request_handler(req, res)
-      if req.path != path
-        res.status = 404
-        res.body = "Not found"
-      elsif SidekiqAlive.alive?
-        res.status = 200
-        res.body = "Alive!"
-      else
-        response = "Can't find the alive key"
-        res.status = 404
-        res.body = response
-        SidekiqAlive.logger.error(response)
-      end
-    end
-
-    private
-
-    attr_reader :path
   end
 end
+
+require_relative "server/default"
+require_relative "server/rack"

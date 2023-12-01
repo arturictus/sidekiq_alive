@@ -5,11 +5,11 @@ module SidekiqAlive
     class Rack
       class << self
         def run!
-          handler = ::Rack::Handler.get(server)
+          @handler = handler
 
-          Signal.trap("TERM") { handler.shutdown }
+          Signal.trap("TERM") { @handler.shutdown }
 
-          @server_pid = fork { handler.run(self, Port: port, Host: host, AccessLog: [], Logger: SidekiqAlive.logger) }
+          @server_pid = fork { @handler.run(self, Port: port, Host: host, AccessLog: [], Logger: SidekiqAlive.logger) }
 
           self
         end
@@ -32,6 +32,10 @@ module SidekiqAlive
         end
 
         private
+
+        def handler
+          Helpers.use_rackup? ? ::Rackup::Handler.get(server) : ::Rack::Handler.get(server)
+        end
 
         def host
           SidekiqAlive.config.host

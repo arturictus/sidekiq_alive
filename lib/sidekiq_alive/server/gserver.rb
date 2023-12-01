@@ -24,7 +24,7 @@ module SidekiqAlive
 
       # Default header for the server name
       DEFAULT_HEADER = {
-        "Server" => SERVER_NAME,
+        "server" => SERVER_NAME,
       }
 
       # Mapping of status codes and error messages
@@ -44,7 +44,7 @@ module SidekiqAlive
         attr_reader :data, :header, :method, :path, :proto
 
         def initialize(data, method = nil, path = nil, proto = nil)
-          @header = Table.new
+          @header = {}
           @data = data
           @method = method
           @path = path
@@ -52,7 +52,7 @@ module SidekiqAlive
         end
 
         def content_length
-          len = @header["Content-Length"]
+          len = @header["content-length"]
           return if len.nil?
 
           len.to_i
@@ -68,39 +68,7 @@ module SidekiqAlive
         def initialize(status = 200)
           @status = status
           @status_message = nil
-          @header = Table.new
-        end
-      end
-
-      # A case-insensitive Hash class for HTTP header
-      #
-      class Table
-        include Enumerable
-
-        def initialize(hash = {})
-          @hash = hash
-          update(hash)
-        end
-
-        def [](key)
-          @hash[key.to_s.capitalize]
-        end
-
-        def []=(key, value)
-          @hash[key.to_s.capitalize] = value
-        end
-
-        def each
-          @hash.each { |k, v| yield k.capitalize, v }
-        end
-
-        def update(hash)
-          hash.each { |k, v| self[k] = v }
-          self
-        end
-
-        def to_s
-          @hash.map { |k, v| "#{k}: #{v}" }.join(CRLF) + CRLF
+          @header = {}
         end
       end
 
@@ -109,7 +77,7 @@ module SidekiqAlive
         if io.gets =~ /^(\S+)\s+(\S+)\s+(\S+)/
           request = Request.new(io, ::Regexp.last_match(1), ::Regexp.last_match(2), ::Regexp.last_match(3))
         else
-          io << http_resp(400, "Bad Request")
+          io << http_resp(status_code: 400)
           return
         end
 
@@ -127,38 +95,42 @@ module SidekiqAlive
         handler.request_handler(request, response)
 
         http_response = http_resp(
-          response.status,
-          response.status_message,
-          response.header,
-          response.body,
+          status_code: response.status,
+          status_message: response.status_message,
+          header: response.header,
+          body: response.body,
         )
 
         # write response back to the client
         io << http_response
       rescue StandardError
-        io << http_resp(500, "Internal Server Error")
+        io << http_resp(status_code: 500)
       end
 
       def http_header(header = nil)
-        new_header = Table.new(DEFAULT_HEADER)
-        new_header.update(header) unless header.nil?
+        new_header = DEFAULT_HEADER.dup
+        new_header.merge(header) unless header.nil?
 
-        new_header["Connection"] = "keep-alive"
-        new_header["Date"] = http_date(Time.now)
+        new_header["connection"] = "close"
+        new_header["date"] = http_date(Time.now)
+        new_header["content-type"] = "text/plain"
 
         new_header
       end
 
-      def http_date(a_time)
-        a_time.gmtime.strftime("%a, %d %b %Y %H:%M:%S GMT")
+      def http_resp(status_code:, status_message: nil, header: nil, body: nil)
+        status_message ||= STATUS_CODE_MAPPING[status_code]
+        status_line = "#{HTTP_PROTO} #{status_code} #{status_message}".rstrip + CRLF
+
+        resp_header = http_header(header)
+        resp_header["content-length"] = body.bytesize.to_s unless body.nil?
+        header_lines = resp_header.map { |k, v| "#{k}: #{v}#{CRLF}" }.join
+
+        [status_line, header_lines, CRLF, body].compact.join
       end
 
-      def http_resp(status_code, status_message = nil, header = nil, body = nil)
-        status_message ||= STATUS_CODE_MAPPING[status_code]
-        h_header = http_header(header)
-        h_header["Content-Length"] = body.bytesize unless body.nil?
-
-        ["#{HTTP_PROTO} #{status_code} #{status_message}", h_header.to_s, body].compact.join(CRLF)
+      def http_date(a_time)
+        a_time.gmtime.strftime("%a, %d %b %Y %H:%M:%S GMT")
       end
 
       def log(msg)

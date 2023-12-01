@@ -51,12 +51,13 @@ RSpec.describe(SidekiqAlive::Server) do
   context "rack based server" do
     let(:pid) { Random.rand(1000) }
     let(:fake_server) { double("rack server", run: pid, shutdown: nil) }
+    let(:handler) { SidekiqAlive::Helpers.use_rackup? ? Rackup::Handler : Rack::Handler }
 
     before do
       ENV["SIDEKIQ_ALIVE_SERVER"] = "webrick"
       SidekiqAlive.config.set_defaults
 
-      allow(Rack::Handler).to(receive(:get).and_return(fake_server))
+      allow(handler).to(receive(:get).and_return(fake_server))
       allow(SidekiqAlive::Server::Rack).to(receive(:fork).and_yield)
 
       allow(Signal).to(receive(:trap))
@@ -70,7 +71,7 @@ RSpec.describe(SidekiqAlive::Server) do
       it "starts server with default arguments and captures TERM" do
         app.run!
 
-        expect(Rack::Handler).to(have_received(:get).with("webrick"))
+        expect(handler).to(have_received(:get).with("webrick"))
         expect(Signal).to(have_received(:trap).with("TERM")) do |&block|
           block.call
 

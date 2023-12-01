@@ -54,6 +54,11 @@ module SidekiqAlive
           res.body = response
           SidekiqAlive.logger.error(response)
         end
+      rescue StandardError => e
+        response = "Internal Server Error"
+        res.status = 500
+        res.body = response
+        SidekiqAlive.logger.error("[SidekiqAlive] #{response}. Error: #{e.message}")
       end
 
       private

@@ -133,6 +133,7 @@ RSpec.describe(SidekiqAlive) do
     end
 
     context "::start" do
+      let(:server) { double("Server", shutdown!: nil) }
       let(:queue_prefix) { :heathcheck }
       let(:queues) do
         next Sidekiq.default_configuration.capsules[SidekiqAlive::CAPSULE_NAME].queues if sidekiq_7
@@ -141,8 +142,8 @@ RSpec.describe(SidekiqAlive) do
       end
 
       before do
-        allow(SidekiqAlive::Server).to(receive(:run!) { 1 })
-        allow(sq_config).to(receive(:on).with(:startup) { |&arg| arg.call })
+        allow(SidekiqAlive::Server).to(receive(:run!) { server })
+        allow(sq_config).to(receive(:on).with(:startup).and_yield)
 
         SidekiqAlive.instance_variable_set(:@redis, nil)
       end
@@ -169,6 +170,17 @@ RSpec.describe(SidekiqAlive) do
         SidekiqAlive.start
 
         expect(queues.first).to(eq("#{queue_prefix}-test-hostname"))
+      end
+
+      it "::shutdown" do
+        SidekiqAlive.start
+
+        expect(SidekiqAlive::Server).to(have_received(:run!))
+        expect(sq_config).to(have_received(:on).with(:shutdown)) do |&arg|
+          arg.call
+
+          expect(server).to(have_received(:shutdown!))
+        end
       end
     end
   end

@@ -7,18 +7,20 @@ module SidekiqAlive
     class Default < Gserver
       class << self
         def run!
-          server = new(port, host, path)
-
-          Signal.trap("TERM") do
-            SidekiqAlive.logger.info("Shutting down SidekiqAlive web server")
-            server.stop
-          end
+          @server = new(port, host, path)
 
           SidekiqAlive.logger.info("Starting SidekiqAlive web server on #{host}:#{port}")
-          server.start
+          @server.start
 
-          nil
+          self
         end
+
+        def shutdown!
+          SidekiqAlive.logger.info("Shutting down SidekiqAlive web server")
+          @server.stop
+        end
+
+        private
 
         def host
           SidekiqAlive.config.host

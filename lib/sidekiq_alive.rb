@@ -34,7 +34,7 @@ module SidekiqAlive
           store_alive_key
           # Passing the hostname argument it's only for debugging enqueued jobs
           SidekiqAlive::Worker.perform_async(hostname)
-          @server_pid = SidekiqAlive::Server.run!
+          @server = SidekiqAlive::Server.run!
 
           logger.info(successful_startup_text)
         end
@@ -45,8 +45,7 @@ module SidekiqAlive
         end
 
         sq_config.on(:shutdown) do
-          Process.kill("TERM", @server_pid) unless @server_pid.nil?
-          Process.wait(@server_pid) unless @server_pid.nil?
+          @server&.shutdown!
 
           unregister_current_instance
           config.shutdown_callback.call

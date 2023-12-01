@@ -9,8 +9,29 @@ module SidekiqAlive
 
           Signal.trap("TERM") { handler.shutdown }
 
-          fork { handler.run(self, Port: port, Host: host, AccessLog: [], Logger: SidekiqAlive.logger) }
+          @server_pid = fork { handler.run(self, Port: port, Host: host, AccessLog: [], Logger: SidekiqAlive.logger) }
+
+          self
         end
+
+        def shutdown!
+          Process.kill("TERM", @server_pid) unless @server_pid.nil?
+          Process.wait(@server_pid) unless @server_pid.nil?
+        end
+
+        def call(env)
+          if ::Rack::Request.new(env).path != path
+            [404, {}, ["Not found"]]
+          elsif SidekiqAlive.alive?
+            [200, {}, ["Alive!"]]
+          else
+            response = "Can't find the alive key"
+            SidekiqAlive.logger.error(response)
+            [404, {}, [response]]
+          end
+        end
+
+        private
 
         def host
           SidekiqAlive.config.host
@@ -26,18 +47,6 @@ module SidekiqAlive
 
         def server
           SidekiqAlive.config.server
-        end
-
-        def call(env)
-          if ::Rack::Request.new(env).path != path
-            [404, {}, ["Not found"]]
-          elsif SidekiqAlive.alive?
-            [200, {}, ["Alive!"]]
-          else
-            response = "Can't find the alive key"
-            SidekiqAlive.logger.error(response)
-            [404, {}, [response]]
-          end
         end
       end
     end

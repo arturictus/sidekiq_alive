@@ -17,7 +17,7 @@ RSpec.describe(SidekiqAlive::Server) do
   subject(:app) { described_class }
 
   context "with default server" do
-    let(:fake_server) { instance_double(SidekiqAlive::Server::Default, start: nil) }
+    let(:fake_server) { instance_double(SidekiqAlive::Server::Default, start: nil, stop: nil) }
 
     before { allow(SidekiqAlive::Server::Default).to(receive(:new).and_return(fake_server)) }
 
@@ -27,6 +27,13 @@ RSpec.describe(SidekiqAlive::Server) do
 
         expect(SidekiqAlive::Server::Default).to(have_received(:new).with(7433, "0.0.0.0", "/"))
         expect(fake_server).to(have_received(:start))
+      end
+
+      it "shuts down server" do
+        server = app.run!
+        server.shutdown!
+
+        expect(fake_server).to(have_received(:stop))
       end
     end
 
@@ -42,7 +49,8 @@ RSpec.describe(SidekiqAlive::Server) do
   end
 
   context "rack based server" do
-    let(:fake_server) { double("rack server", run: nil) }
+    let(:pid) { Random.rand(1000) }
+    let(:fake_server) { double("rack server", run: pid, shutdown: nil) }
 
     before do
       ENV["SIDEKIQ_ALIVE_SERVER"] = "webrick"
@@ -50,18 +58,35 @@ RSpec.describe(SidekiqAlive::Server) do
 
       allow(Rack::Handler).to(receive(:get).and_return(fake_server))
       allow(SidekiqAlive::Server::Rack).to(receive(:fork).and_yield)
+
+      allow(Signal).to(receive(:trap))
+      allow(Process).to(receive(:kill))
+      allow(Process).to(receive(:wait))
     end
 
     after { ENV["SIDEKIQ_ALIVE_SERVER"] = nil }
 
     context "with default config" do
-      it "starts server with default arguments" do
+      it "starts server with default arguments and captures TERM" do
         app.run!
 
         expect(Rack::Handler).to(have_received(:get).with("webrick"))
+        expect(Signal).to(have_received(:trap).with("TERM")) do |&block|
+          block.call
+
+          expect(fake_server).to(have_received(:shutdown))
+        end
         expect(fake_server).to(have_received(:run).with(
           SidekiqAlive::Server::Rack, Port: 7433, Host: "0.0.0.0", AccessLog: [], Logger: SidekiqAlive.logger
         ))
+      end
+
+      it "shuts down server" do
+        server = app.run!
+        server.shutdown!
+
+        expect(Process).to(have_received(:kill).with("TERM", pid))
+        expect(Process).to(have_received(:wait).with(pid))
       end
     end
 

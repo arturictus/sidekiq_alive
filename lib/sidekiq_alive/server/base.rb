@@ -14,7 +14,7 @@ module SidekiqAlive
       private
 
       def configure_shutdown
-        at_exit do
+        Kernel.at_exit do
           SidekiqAlive.logger.info("Shutting down SidekiqAlive web server")
           Process.kill(SHUTDOWN_SIGNAL, @server_pid) unless @server_pid.nil?
           Process.wait(@server_pid) unless @server_pid.nil?

@@ -8,7 +8,7 @@ module SidekiqAlive
     # https://github.com/redis-rb/redis-client
     class RedisClientGem < Base
       def initialize(capsule = nil)
-        super
+        super()
 
         @capsule = Sidekiq.default_configuration.capsules[capsule || CAPSULE_NAME]
       end

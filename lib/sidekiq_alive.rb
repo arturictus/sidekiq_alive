@@ -46,6 +46,7 @@ module SidekiqAlive
         end
 
         sq_config.on(:shutdown) do
+          remove_queue
           redis.zrem(HOSTNAME_REGISTRY, current_instance_register_key)
           config.shutdown_callback.call
         end
@@ -73,9 +74,14 @@ module SidekiqAlive
       else
         schedule_set.scan('"class":"SidekiqAlive::Worker"').select { |job| job.queue == current_queue }
       end
-      logger.info("[SidekiqAlive] Purging #{jobs.count} pending for #{hostname}")
-      jobs.each(&:delete)
 
+      unless jobs.empty?
+        logger.info("[SidekiqAlive] Purging #{jobs.count} pending jobs for #{hostname}")
+        jobs.each(&:delete)
+      end
+    end
+
+    def remove_queue
       logger.info("[SidekiqAlive] Removing queue #{current_queue}")
       Sidekiq::Queue.new(current_queue).clear
     end

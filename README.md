@@ -272,7 +272,7 @@ SidekiqAlive.setup do |config|
 
   # ==> Rack server
   # Web server used to serve an HTTP response. By default simple GServer based http server is used.
-  # To use specific server, rack gem version < 3 is required.
+  # To use specific server, rack gem version > 2 is required. For rack version >= 3, rackup gem is required.
   # Can also be set with the environment variable SIDEKIQ_ALIVE_SERVER.
   # default: nil
   #

@@ -7,10 +7,10 @@ module SidekiqAlive
     # Wrapper for `redis-client` gem used by `sidekiq` > 7
     # https://github.com/redis-rb/redis-client
     class RedisClientGem < Base
-      def initialize
+      def initialize(capsule = nil)
         super
 
-        @capsule = Sidekiq.default_configuration.capsules[CAPSULE_NAME]
+        @capsule = Sidekiq.default_configuration.capsules[capsule || CAPSULE_NAME]
       end
 
       def set(key, time:, ex:)

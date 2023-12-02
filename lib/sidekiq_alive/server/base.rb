@@ -3,10 +3,18 @@
 module SidekiqAlive
   module Server
     module Base
+      SHUTDOWN_SIGNAL = "TERM"
+
       def shutdown!
         SidekiqAlive.logger.info("Shutting down SidekiqAlive web server")
-        Process.kill("TERM", @server_pid) unless @server_pid.nil?
+        Process.kill(SHUTDOWN_SIGNAL, @server_pid) unless @server_pid.nil?
         Process.wait(@server_pid) unless @server_pid.nil?
+      end
+
+      private
+
+      def configure_shutdown_signal(&block)
+        Signal.trap(SHUTDOWN_SIGNAL, &block)
       end
 
       def host
@@ -24,8 +32,6 @@ module SidekiqAlive
       def logger
         SidekiqAlive.logger
       end
-
-      module_function :host, :port, :path, :logger
     end
   end
 end

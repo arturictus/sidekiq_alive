@@ -10,11 +10,12 @@ module SidekiqAlive
 
       class << self
         def run!
-          @server = new(port, host, path)
-
           logger.info("[SidekiqAlive] Starting default healthcheck server on #{host}:#{port}")
-          Signal.trap("TERM") { @server.stop }
-          @server_pid = fork do
+          @server_pid = ::Process.fork do
+            @server = new(port, host, path)
+            # stop is wrapped in a thread because gserver calls synchrnonize which raises an error
+            configure_shutdown_signal { Thread.new { @server.stop } }
+
             @server.start
             @server.join
           end

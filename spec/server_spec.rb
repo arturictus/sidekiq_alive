@@ -15,38 +15,39 @@ end
 
 RSpec.describe(SidekiqAlive::Server) do
   subject(:app) { described_class }
+
   let(:pid) { Random.rand(1000) }
 
   before do
-    allow(Signal).to(receive(:trap))
+    allow(Process).to(receive(:fork).and_return(pid))
     allow(Process).to(receive(:kill))
     allow(Process).to(receive(:wait))
+    allow(Signal).to(receive(:trap))
   end
 
   context "with default server" do
     let(:fake_server) { instance_double(SidekiqAlive::Server::Default, start: nil, stop: nil, join: nil) }
 
     before do
-      allow(SidekiqAlive::Server::Default).to(receive(:fork).and_return(pid))
       allow(SidekiqAlive::Server::Default).to(receive(:new).and_return(fake_server))
+      allow(Thread).to(receive(:new).and_yield)
     end
 
     context "with default config" do
       it "starts server with default arguments and traps shutdown", :aggregate_failures do
         app.run!
 
-        expect(SidekiqAlive::Server::Default).to(have_received(:new).with(7433, "0.0.0.0", "/"))
-        expect(Signal).to(have_received(:trap).with("TERM")) do |&block|
+        expect(Process).to(have_received(:fork)) do |&block|
           block.call
 
-          expect(fake_server).to(have_received(:stop))
-        end
-
-        expect(SidekiqAlive::Server::Default).to(have_received(:fork)) do |&block|
-          block.call
-
+          expect(SidekiqAlive::Server::Default).to(have_received(:new).with(7433, "0.0.0.0", "/"))
           expect(fake_server).to(have_received(:start))
           expect(fake_server).to(have_received(:join))
+          expect(Signal).to(have_received(:trap).with("TERM")) do |&arg|
+            arg.call
+
+            expect(fake_server).to(have_received(:stop))
+          end
         end
       end
 
@@ -65,7 +66,11 @@ RSpec.describe(SidekiqAlive::Server) do
       it "starts with updated configuration" do
         app.run!
 
-        expect(SidekiqAlive::Server::Default).to(have_received(:new).with(4567, "1.2.3.4", "/health"))
+        expect(Process).to(have_received(:fork)) do |&block|
+          block.call
+
+          expect(SidekiqAlive::Server::Default).to(have_received(:new).with(4567, "1.2.3.4", "/health"))
+        end
       end
     end
   end
@@ -78,7 +83,6 @@ RSpec.describe(SidekiqAlive::Server) do
       ENV["SIDEKIQ_ALIVE_SERVER"] = "webrick"
       SidekiqAlive.config.set_defaults
 
-      allow(SidekiqAlive::Server::Rack).to(receive(:fork).and_return(pid))
       allow(handler).to(receive(:get).and_return(fake_server))
     end
 
@@ -88,18 +92,18 @@ RSpec.describe(SidekiqAlive::Server) do
       it "starts server with default arguments and traps shutdown", :aggregate_failures do
         app.run!
 
-        expect(handler).to(have_received(:get).with("webrick"))
-        expect(Signal).to(have_received(:trap).with("TERM")) do |&block|
+        expect(Process).to(have_received(:fork)) do |&block|
           block.call
 
-          expect(fake_server).to(have_received(:shutdown))
-        end
-        expect(SidekiqAlive::Server::Rack).to(have_received(:fork)) do |&block|
-          block.call
-
+          expect(handler).to(have_received(:get).with("webrick"))
           expect(fake_server).to(have_received(:run).with(
             SidekiqAlive::Server::Rack, Port: 7433, Host: "0.0.0.0", AccessLog: [], Logger: SidekiqAlive.logger
           ))
+          expect(Signal).to(have_received(:trap).with("TERM")) do |&arg|
+            arg.call
+
+            expect(fake_server).to(have_received(:shutdown))
+          end
         end
       end
 
@@ -118,7 +122,7 @@ RSpec.describe(SidekiqAlive::Server) do
       it "starts with updated configuration" do
         app.run!
 
-        expect(SidekiqAlive::Server::Rack).to(have_received(:fork)) do |&block|
+        expect(Process).to(have_received(:fork)) do |&block|
           block.call
 
           expect(fake_server).to(have_received(:run).with(

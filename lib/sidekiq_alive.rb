@@ -28,9 +28,7 @@ module SidekiqAlive
           end
 
           logger.info("[SidekiqAlive] #{startup_info}")
-
           register_current_instance
-
           store_alive_key
           # Passing the hostname argument it's only for debugging enqueued jobs
           SidekiqAlive::Worker.perform_async(hostname)

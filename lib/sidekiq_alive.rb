@@ -45,7 +45,7 @@ module SidekiqAlive
 
         sq_config.on(:shutdown) do
           remove_queue
-          # make sure correct redis pool is used
+          # make sure correct redis connection pool is used
           # sidekiq will terminate non internal capsules
           Redis.adapter("internal").zrem(HOSTNAME_REGISTRY, current_instance_register_key)
           config.shutdown_callback.call

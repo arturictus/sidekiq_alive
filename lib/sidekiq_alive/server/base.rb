@@ -6,8 +6,9 @@ module SidekiqAlive
       SHUTDOWN_SIGNAL = "TERM"
       QUIET_SIGNAL = "USR1"
 
+      # set web server to quiet mode
       def quiet!
-        Process.kill("USR1", @server_pid) unless @server_pid.nil?
+        Process.kill(QUIET_SIGNAL, @server_pid) unless @server_pid.nil?
       end
 
       private

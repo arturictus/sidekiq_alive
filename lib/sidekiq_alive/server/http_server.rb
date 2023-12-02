@@ -48,11 +48,6 @@ module SidekiqAlive
         super(port, host, 1, nil, logger.debug?, logger.debug?)
       end
 
-      # Override stop to avoid exception caused by calling synchronize in trap context
-      def stop
-        @tcpServerThread&.raise "stop"
-      end
-
       private
 
       attr_reader :handler, :logger

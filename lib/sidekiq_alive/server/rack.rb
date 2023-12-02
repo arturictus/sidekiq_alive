@@ -9,11 +9,13 @@ module SidekiqAlive
 
       class << self
         def run!
-          @handler = handler
-
           logger.info("[SidekiqAlive] Starting healthcheck '#{server}' server")
-          Signal.trap("TERM") { @handler.shutdown }
-          @server_pid = fork { @handler.run(self, Port: port, Host: host, AccessLog: [], Logger: logger) }
+          @server_pid = ::Process.fork do
+            @handler = handler
+            configure_shutdown_signal { @handler.shutdown }
+
+            @handler.run(self, Port: port, Host: host, AccessLog: [], Logger: logger)
+          end
           logger.info("[SidekiqAlive] Web server started in subprocess with pid #{@server_pid}")
 
           self

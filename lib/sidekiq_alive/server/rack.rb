@@ -13,6 +13,8 @@ module SidekiqAlive
           @server_pid = ::Process.fork do
             @handler = handler
             configure_shutdown_signal { @handler.shutdown }
+            configure_quiet_signal { @quiet = true }
+            configure_shutdown
 
             @handler.run(self, Port: port, Host: host, AccessLog: [], Logger: logger)
           end
@@ -22,17 +24,25 @@ module SidekiqAlive
 
         def call(env)
           req = ::Rack::Request.new(env)
+
           if req.path != path
             logger.warn("[SidekiqAlive] Path '#{req.path}' not found")
-            [404, {}, ["Not found"]]
-          elsif SidekiqAlive.alive?
-            logger.debug("[SidekiqAlive] Found alive key!")
-            [200, {}, ["Alive!"]]
-          else
-            response = "Can't find the alive key"
-            logger.error("[SidekiqAlive] #{response}")
-            [404, {}, [response]]
+            return [404, {}, ["Not found"]]
           end
+
+          if @quiet
+            logger.debug("[SidekiqAlive] [SidekiqAlive] Server in quiet mode, skipping alive key lookup!")
+            return [200, {}, ["Server is shutting down"]]
+          end
+
+          if SidekiqAlive.alive?
+            logger.debug("[SidekiqAlive] Found alive key!")
+            return [200, {}, ["Alive!"]]
+          end
+
+          response = "Can't find the alive key"
+          logger.error("[SidekiqAlive] #{response}")
+          [404, {}, [response]]
         rescue StandardError => e
           logger.error("[SidekiqAlive] #{response} looking for alive key. Error: #{e.message}")
           [500, {}, ["Internal Server Error"]]

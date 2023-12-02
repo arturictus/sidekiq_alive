@@ -40,14 +40,13 @@ module SidekiqAlive
         end
 
         sq_config.on(:quiet) do
-          unregister_current_instance
-          config.shutdown_callback.call
+          logger.info("[SidekiqAlive] #{shutdown_info}")
+          purge_pending_jobs
+          @server&.quiet!
         end
 
         sq_config.on(:shutdown) do
-          @server&.shutdown!
-
-          unregister_current_instance
+          redis.zrem(HOSTNAME_REGISTRY, current_instance_register_key)
           config.shutdown_callback.call
         end
       end
@@ -59,13 +58,6 @@ module SidekiqAlive
 
     def register_current_instance
       register_instance(current_instance_register_key)
-    end
-
-    def unregister_current_instance
-      # Delete any pending jobs for this instance
-      logger.info("[SidekiqAlive] #{shutdown_info}")
-      purge_pending_jobs
-      redis.zrem(HOSTNAME_REGISTRY, current_instance_register_key)
     end
 
     def registered_instances

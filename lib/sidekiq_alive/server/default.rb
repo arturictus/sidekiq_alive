@@ -15,6 +15,8 @@ module SidekiqAlive
             @server = new(port, host, path)
             # stop is wrapped in a thread because gserver calls synchrnonize which raises an error when in trap context
             configure_shutdown_signal { Thread.new { @server.stop } }
+            configure_quiet_signal { @server.quiet! }
+            configure_shutdown
 
             @server.start
             @server.join
@@ -35,22 +37,34 @@ module SidekiqAlive
         if req.path != path
           res.status = 404
           res.body = "Not found"
-          logger.warn("[SidekiqAlive] Path '#{req.path}' not found")
-        elsif SidekiqAlive.alive?
+          return logger.warn("[SidekiqAlive] Path '#{req.path}' not found")
+        end
+
+        if @quiet
+          res.status = 200
+          res.body = "Server is shutting down"
+          return logger.debug("[SidekiqAlive] Server in quiet mode, skipping alive key lookup!")
+        end
+
+        if SidekiqAlive.alive?
           res.status = 200
           res.body = "Alive!"
-          logger.debug("[SidekiqAlive] Found alive key!")
-        else
-          response = "Can't find the alive key"
-          res.status = 404
-          res.body = response
-          logger.error("[SidekiqAlive] #{response}")
+          return logger.debug("[SidekiqAlive] Found alive key!")
         end
+
+        response = "Can't find the alive key"
+        res.status = 404
+        res.body = response
+        logger.error("[SidekiqAlive] #{response}")
       rescue StandardError => e
         response = "Internal Server Error"
         res.status = 500
         res.body = response
         logger.error("[SidekiqAlive] #{response} looking for alive key. Error: #{e.message}")
+      end
+
+      def quiet!
+        @quiet = true
       end
 
       private

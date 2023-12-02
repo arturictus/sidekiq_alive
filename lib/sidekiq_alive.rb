@@ -27,7 +27,7 @@ module SidekiqAlive
             (sq_config.respond_to?(:[]) ? sq_config[:queues] : sq_config.options[:queues]).unshift(current_queue)
           end
 
-          logger.info(startup_info)
+          logger.info("[SidekiqAlive] #{startup_info}")
 
           register_current_instance
 
@@ -36,7 +36,7 @@ module SidekiqAlive
           SidekiqAlive::Worker.perform_async(hostname)
           @server = SidekiqAlive::Server.run!
 
-          logger.info(successful_startup_text)
+          logger.info("[SidekiqAlive] #{successful_startup_text}")
         end
 
         sq_config.on(:quiet) do
@@ -63,7 +63,7 @@ module SidekiqAlive
 
     def unregister_current_instance
       # Delete any pending jobs for this instance
-      logger.info(shutdown_info)
+      logger.info("[SidekiqAlive] #{shutdown_info}")
       purge_pending_jobs
       redis.zrem(HOSTNAME_REGISTRY, current_instance_register_key)
     end

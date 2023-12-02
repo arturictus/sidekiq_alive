@@ -1,52 +1,46 @@
 # frozen_string_literal: true
 
+require_relative "base"
+
 module SidekiqAlive
   module Server
     class Rack
+      extend Base
+
       class << self
         def run!
           @handler = handler
 
+          logger.info("[SidekiqAlive] Starting healthcheck '#{server}' server")
           Signal.trap("TERM") { @handler.shutdown }
-
-          @server_pid = fork { @handler.run(self, Port: port, Host: host, AccessLog: [], Logger: SidekiqAlive.logger) }
+          @server_pid = fork { @handler.run(self, Port: port, Host: host, AccessLog: [], Logger: logger) }
+          logger.info("[SidekiqAlive] Web server started in subprocess with pid #{@server_pid}")
 
           self
         end
 
-        def shutdown!
-          Process.kill("TERM", @server_pid) unless @server_pid.nil?
-          Process.wait(@server_pid) unless @server_pid.nil?
-        end
-
         def call(env)
-          if ::Rack::Request.new(env).path != path
+          req = ::Rack::Request.new(env)
+          if req.path != path
+            logger.warn("[SidekiqAlive] Path '#{req.path}' not found")
             [404, {}, ["Not found"]]
           elsif SidekiqAlive.alive?
+            logger.debug("[SidekiqAlive] Found alive key!")
             [200, {}, ["Alive!"]]
           else
             response = "Can't find the alive key"
-            SidekiqAlive.logger.error(response)
+            logger.error("[SidekiqAlive] #{response}")
             [404, {}, [response]]
           end
+        rescue StandardError => e
+          logger.error("[SidekiqAlive] #{response} looking for alive key. Error: #{e.message}")
+          [500, {}, ["Internal Server Error"]]
         end
 
         private
 
         def handler
           Helpers.use_rackup? ? ::Rackup::Handler.get(server) : ::Rack::Handler.get(server)
-        end
-
-        def host
-          SidekiqAlive.config.host
-        end
-
-        def port
-          SidekiqAlive.config.port.to_i
-        end
-
-        def path
-          SidekiqAlive.config.path
         end
 
         def server

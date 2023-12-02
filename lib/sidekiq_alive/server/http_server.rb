@@ -6,38 +6,7 @@ module SidekiqAlive
   module Server
     # Simple HTTP server implementation
     #
-    class Gserver < GServer
-      def initialize(handle_obj, port, host, logger = Logger.new($stdout))
-        @handler = handle_obj
-        @logger = logger
-
-        super(port, host, 2, nil, true, true)
-      end
-
-      private
-
-      attr_reader :handler, :logger
-
-      CRLF        = "\r\n"
-      HTTP_PROTO  = "HTTP/1.1"
-      SERVER_NAME = "SidekiqAlive/#{SidekiqAlive::VERSION} (Ruby/#{RUBY_VERSION})"
-
-      # Default header for the server name
-      DEFAULT_HEADER = {
-        "server" => SERVER_NAME,
-      }
-
-      # Mapping of status codes and error messages
-      STATUS_CODE_MAPPING = {
-        200 => "OK",
-        400 => "Bad Request",
-        403 => "Forbidden",
-        404 => "Not Found",
-        405 => "Method Not Allowed",
-        411 => "Length Required",
-        500 => "Internal Server Error",
-      }
-
+    class HttpServer < GServer
       # Request class for HTTP server
       #
       class Request
@@ -52,7 +21,7 @@ module SidekiqAlive
         end
 
         def content_length
-          len = @header["content-length"]
+          len = @header["Content-Length"]
           return if len.nil?
 
           len.to_i
@@ -71,6 +40,42 @@ module SidekiqAlive
           @header = {}
         end
       end
+
+      def initialize(handle_obj, port, host, logger = Logger.new($stdout))
+        @handler = handle_obj
+        @logger = logger
+
+        super(port, host, 1, nil, logger.debug?, logger.debug?)
+      end
+
+      # Override stop to avoid exception caused by calling synchronize in trap context
+      def stop
+        @tcpServerThread&.raise "stop"
+      end
+
+      private
+
+      attr_reader :handler, :logger
+
+      CRLF        = "\r\n"
+      HTTP_PROTO  = "HTTP/1.1"
+      SERVER_NAME = "SidekiqAlive/#{SidekiqAlive::VERSION} (Ruby/#{RUBY_VERSION})"
+
+      # Default header for the server name
+      DEFAULT_HEADER = {
+        "Server" => SERVER_NAME,
+      }
+
+      # Mapping of status codes and error messages
+      STATUS_CODE_MAPPING = {
+        200 => "OK",
+        400 => "Bad Request",
+        403 => "Forbidden",
+        404 => "Not Found",
+        405 => "Method Not Allowed",
+        411 => "Length Required",
+        500 => "Internal Server Error",
+      }
 
       def serve(io)
         # parse first line
@@ -111,9 +116,9 @@ module SidekiqAlive
         new_header = DEFAULT_HEADER.dup
         new_header.merge(header) unless header.nil?
 
-        new_header["connection"] = "close"
-        new_header["date"] = http_date(Time.now)
-        new_header["content-type"] = "text/plain"
+        new_header["Connection"] = "Keep-Alive"
+        new_header["Date"] = http_date(Time.now)
+        new_header["Content-Type"] = "text/plain"
 
         new_header
       end
@@ -123,7 +128,7 @@ module SidekiqAlive
         status_line = "#{HTTP_PROTO} #{status_code} #{status_message}".rstrip + CRLF
 
         resp_header = http_header(header)
-        resp_header["content-length"] = body.bytesize.to_s unless body.nil?
+        resp_header["Content-Length"] = body.bytesize.to_s unless body.nil?
         header_lines = resp_header.map { |k, v| "#{k}: #{v}#{CRLF}" }.join
 
         [status_line, header_lines, CRLF, body].compact.join

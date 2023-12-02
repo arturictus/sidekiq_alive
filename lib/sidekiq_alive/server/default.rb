@@ -1,37 +1,26 @@
 # frozen_string_literal: true
 
-require_relative "gserver"
+require_relative "http_server"
+require_relative "base"
 
 module SidekiqAlive
   module Server
-    class Default < Gserver
+    class Default < HttpServer
+      extend Base
+
       class << self
         def run!
           @server = new(port, host, path)
 
-          SidekiqAlive.logger.info("Starting SidekiqAlive web server on #{host}:#{port}")
-          @server.start
+          logger.info("[SidekiqAlive] Starting default healthcheck server on #{host}:#{port}")
+          Signal.trap("TERM") { @server.stop }
+          @server_pid = fork do
+            @server.start
+            @server.join
+          end
+          logger.info("[SidekiqAlive] Web server started in subprocess with pid #{@server_pid}")
 
           self
-        end
-
-        def shutdown!
-          SidekiqAlive.logger.info("Shutting down SidekiqAlive web server")
-          @server.stop
-        end
-
-        private
-
-        def host
-          SidekiqAlive.config.host
-        end
-
-        def port
-          SidekiqAlive.config.port.to_i
-        end
-
-        def path
-          SidekiqAlive.config.path
         end
       end
 
@@ -45,20 +34,22 @@ module SidekiqAlive
         if req.path != path
           res.status = 404
           res.body = "Not found"
+          logger.warn("[SidekiqAlive] Path '#{req.path}' not found")
         elsif SidekiqAlive.alive?
           res.status = 200
           res.body = "Alive!"
+          logger.debug("[SidekiqAlive] Found alive key!")
         else
           response = "Can't find the alive key"
           res.status = 404
           res.body = response
-          SidekiqAlive.logger.error(response)
+          logger.error("[SidekiqAlive] #{response}")
         end
       rescue StandardError => e
         response = "Internal Server Error"
         res.status = 500
         res.body = response
-        SidekiqAlive.logger.error("[SidekiqAlive] #{response}. Error: #{e.message}")
+        logger.error("[SidekiqAlive] #{response} looking for alive key. Error: #{e.message}")
       end
 
       private

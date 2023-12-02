@@ -40,6 +40,7 @@ module SidekiqAlive
         sq_config.on(:quiet) do
           logger.info("[SidekiqAlive] #{shutdown_info}")
           purge_pending_jobs
+          # set web server to quiet mode
           @server&.quiet!
         end
 

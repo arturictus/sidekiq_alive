@@ -16,7 +16,6 @@ module SidekiqAlive
 
             @handler.run(self, Port: port, Host: host, AccessLog: [], Logger: logger)
           end
-          logger.info("[SidekiqAlive] Web server started in subprocess with pid #{@server_pid}")
 
           self
         end

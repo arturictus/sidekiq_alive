@@ -113,7 +113,6 @@ module SidekiqAlive
 
         new_header["Connection"] = "Keep-Alive"
         new_header["Date"] = http_date(Time.now)
-        new_header["Content-Type"] = "text/plain"
 
         new_header
       end

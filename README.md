@@ -247,12 +247,10 @@ SidekiqAlive.setup do |config|
   #    config.callback = proc { Net::HTTP.get("https://status.com/ping") }
 
   # ==> Shutdown callback
-  # When sidekiq process is shutting down, you can perform some action, like cleaning up created queue
+  # When sidekiq process is shutting down, you can perform some arbitrary action.
   # default: proc {}
   #
-  #    config.shutdown_callback = proc do
-  #      Sidekiq::Queue.all.find { |q| q.name == "#{config.queue_prefix}-#{SidekiqAlive.hostname}" }&.clear
-  #    end
+  #    config.shutdown_callback = proc { puts "Sidekiq is shutting down" }
 
   # ==> Queue Prefix
   # SidekiqAlive will run in a independent queue for each instance/replica

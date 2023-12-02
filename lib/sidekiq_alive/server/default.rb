@@ -40,7 +40,7 @@ module SidekiqAlive
           return logger.warn("[SidekiqAlive] Path '#{req.path}' not found")
         end
 
-        if @quiet
+        if quiet?
           res.status = 200
           res.body = "Server is shutting down"
           return logger.debug("[SidekiqAlive] Server in quiet mode, skipping alive key lookup!")
@@ -64,12 +64,16 @@ module SidekiqAlive
       end
 
       def quiet!
-        @quiet = true
+        @quiet = Time.now
       end
 
       private
 
       attr_reader :path
+
+      def quiet?
+        @quiet && (@quiet - Time.now) < SidekiqAlive.config.quiet_timeout
+      end
     end
   end
 end

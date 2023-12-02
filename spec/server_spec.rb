@@ -116,7 +116,7 @@ RSpec.describe(SidekiqAlive::Server, :aggregate_failures) do
         expect(Signal).to(have_received(:trap).with("USR1")) do |&arg|
           arg.call
 
-          expect(SidekiqAlive::Server::Rack.instance_variable_get(:@quiet)).to(eq(true))
+          expect(SidekiqAlive::Server::Rack.instance_variable_get(:@quiet)).to(be_instance_of(Time))
         end
       end
 

@@ -276,6 +276,16 @@ SidekiqAlive.setup do |config|
   #
   #    config.server = 'puma'
 
+  # ==> Quiet mode timeout in seconds
+  # When sidekiq is shutting down, all job processing is stopped. This includes alive key update job. In case of
+  # long running jobs, alive key can expire before the job is finished. To avoid this, web server is set in to quiet mode
+  # and is returning 200 OK for healthcheck requests. To avoid infinite quiet mode in case sidekiq process is stuck in shutdown,
+  # timeout can be set. After timeout is reached, web server resumes normal operations and will return unhealthy status in case
+  # alive key is expired or purged from redis.
+  # default: 180
+  #
+  #    config.quiet_timeout = 300
+
 end
 ```
 

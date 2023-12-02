@@ -13,7 +13,7 @@ module SidekiqAlive
           @server_pid = ::Process.fork do
             @handler = handler
             configure_shutdown_signal { @handler.shutdown }
-            configure_quiet_signal { @quiet = true }
+            configure_quiet_signal { @quiet = Time.now }
             configure_shutdown
 
             @handler.run(self, Port: port, Host: host, AccessLog: [], Logger: logger)
@@ -30,7 +30,7 @@ module SidekiqAlive
             return [404, {}, ["Not found"]]
           end
 
-          if @quiet
+          if quiet?
             logger.debug("[SidekiqAlive] [SidekiqAlive] Server in quiet mode, skipping alive key lookup!")
             return [200, {}, ["Server is shutting down"]]
           end
@@ -49,6 +49,10 @@ module SidekiqAlive
         end
 
         private
+
+        def quiet?
+          @quiet && (@quiet - Time.now) < SidekiqAlive.config.quiet_timeout
+        end
 
         def handler
           Helpers.use_rackup? ? ::Rackup::Handler.get(server) : ::Rack::Handler.get(server)

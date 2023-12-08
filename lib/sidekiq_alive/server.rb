@@ -1,45 +1,30 @@
 # frozen_string_literal: true
 
-require "rack"
-
 module SidekiqAlive
-  class Server
+  module Server
     class << self
       def run!
-        handler = Rack::Handler.get(server)
-
-        Signal.trap("TERM") { handler.shutdown }
-
-        handler.run(self, Port: port, Host: host, AccessLog: [], Logger: SidekiqAlive.logger)
+        server.run!
       end
 
-      def host
-        SidekiqAlive.config.host
-      end
-
-      def port
-        SidekiqAlive.config.port
-      end
-
-      def path
-        SidekiqAlive.config.path
-      end
+      private
 
       def server
-        SidekiqAlive.config.server
+        use_rack? ? Rack : Default
       end
 
-      def call(env)
-        if Rack::Request.new(env).path != path
-          [404, {}, ["Not found"]]
-        elsif SidekiqAlive.alive?
-          [200, {}, ["Alive!"]]
-        else
-          response = "Can't find the alive key"
-          SidekiqAlive.logger.error(response)
-          [404, {}, [response]]
-        end
+      def use_rack?
+        return false unless SidekiqAlive.config.server
+
+        Helpers.use_rackup? || Helpers.use_rack?
+      end
+
+      def logger
+        SidekiqAlive.logger
       end
     end
   end
 end
+
+require_relative "server/default"
+require_relative "server/rack"

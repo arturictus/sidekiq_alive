@@ -1,140 +1,135 @@
 # frozen_string_literal: true
 
-require "rack/test"
-require "net/http"
+around_config = proc do |example|
+  ENV["SIDEKIQ_ALIVE_HOST"] = "1.2.3.4"
+  ENV["SIDEKIQ_ALIVE_PORT"] = "4567"
+  ENV["SIDEKIQ_ALIVE_PATH"] = "/health"
+  SidekiqAlive.config.set_defaults
+
+  example.run
+
+  ENV["SIDEKIQ_ALIVE_HOST"] = nil
+  ENV["SIDEKIQ_ALIVE_PORT"] = nil
+  ENV["SIDEKIQ_ALIVE_PATH"] = nil
+end
 
 RSpec.describe(SidekiqAlive::Server) do
-  include Rack::Test::Methods
-
   subject(:app) { described_class }
 
-  describe "#run!" do
-    subject { app.run! }
+  let(:pid) { Random.rand(1000) }
 
-    before { allow(Rack::Handler).to(receive(:get).with("webrick").and_return(fake_webrick)) }
+  before do
+    allow(Process).to(receive(:fork).and_return(pid))
+    allow(Process).to(receive(:kill))
+    allow(Process).to(receive(:wait))
+    allow(Signal).to(receive(:trap))
+  end
 
-    let(:fake_webrick) { double }
+  context "with default server" do
+    let(:fake_server) { instance_double(SidekiqAlive::Server::Default, start: nil, stop: nil, join: nil) }
 
-    it "runs the handler with sidekiq_alive logger, host and no access logs" do
-      expect(fake_webrick).to(receive(:run).with(
-        described_class,
-        hash_including(
-          Logger: SidekiqAlive.logger,
-          Host: "0.0.0.0",
-          AccessLog: [],
-        ),
-      ))
-
-      subject
+    before do
+      allow(SidekiqAlive::Server::Default).to(receive(:new).and_return(fake_server))
+      allow(Thread).to(receive(:new).and_yield)
     end
 
-    context "when we change the host config" do
-      around do |example|
-        ENV["SIDEKIQ_ALIVE_HOST"] = "1.2.3.4"
-        SidekiqAlive.config.set_defaults
+    context "with default config" do
+      it "starts server with default arguments and traps shutdown", :aggregate_failures do
+        app.run!
 
-        example.run
+        expect(Process).to(have_received(:fork)) do |&block|
+          block.call
 
-        ENV["SIDEKIQ_ALIVE_HOST"] = nil
+          expect(SidekiqAlive::Server::Default).to(have_received(:new).with(7433, "0.0.0.0", "/"))
+          expect(fake_server).to(have_received(:start))
+          expect(fake_server).to(have_received(:join))
+          expect(Signal).to(have_received(:trap).with("TERM")) do |&arg|
+            arg.call
+
+            expect(fake_server).to(have_received(:stop))
+          end
+        end
       end
 
-      it "respects the SIDEKIQ_ALIVE_HOST environment variable" do
-        expect(fake_webrick).to(receive(:run).with(
-          described_class,
-          hash_including(Host: "1.2.3.4"),
-        ))
+      it "shuts down server" do
+        server = app.run!
+        server.shutdown!
 
-        subject
+        expect(Process).to(have_received(:kill).with("TERM", pid))
+        expect(Process).to(have_received(:wait).with(pid))
+      end
+    end
+
+    context "with changed host, port and path configuration" do
+      around(&around_config)
+
+      it "starts with updated configuration" do
+        app.run!
+
+        expect(Process).to(have_received(:fork)) do |&block|
+          block.call
+
+          expect(SidekiqAlive::Server::Default).to(have_received(:new).with(4567, "1.2.3.4", "/health"))
+        end
       end
     end
   end
 
-  describe "responses" do
-    it "responds with success when the service is alive" do
-      allow(SidekiqAlive).to(receive(:alive?) { true })
-      get "/"
-      expect(last_response).to(be_ok)
-      expect(last_response.body).to(eq("Alive!"))
-    end
+  context "rack based server" do
+    let(:fake_server) { double("rack server", run: nil, shutdown: nil) }
+    let(:handler) { SidekiqAlive::Helpers.use_rackup? ? Rackup::Handler : Rack::Handler }
 
-    it "responds with an error when the service is not alive" do
-      allow(SidekiqAlive).to(receive(:alive?) { false })
-      get "/"
-      expect(last_response).not_to(be_ok)
-      expect(last_response.body).to(eq("Can't find the alive key"))
-    end
-
-    it "responds not found on an unknown path" do
-      get "/unknown-path"
-      expect(last_response).not_to(be_ok)
-      expect(last_response.body).to(eq("Not found"))
-    end
-  end
-
-  describe "SidekiqAlive setup host" do
     before do
-      ENV["SIDEKIQ_ALIVE_HOST"] = "1.2.3.4"
+      ENV["SIDEKIQ_ALIVE_SERVER"] = "webrick"
       SidekiqAlive.config.set_defaults
+
+      allow(handler).to(receive(:get).and_return(fake_server))
     end
 
-    after do
-      ENV["SIDEKIQ_ALIVE_HOST"] = nil
+    after { ENV["SIDEKIQ_ALIVE_SERVER"] = nil }
+
+    context "with default config" do
+      it "starts server with default arguments and traps shutdown", :aggregate_failures do
+        app.run!
+
+        expect(Process).to(have_received(:fork)) do |&block|
+          block.call
+
+          expect(handler).to(have_received(:get).with("webrick"))
+          expect(fake_server).to(have_received(:run).with(
+            SidekiqAlive::Server::Rack, Port: 7433, Host: "0.0.0.0", AccessLog: [], Logger: SidekiqAlive.logger
+          ))
+          expect(Signal).to(have_received(:trap).with("TERM")) do |&arg|
+            arg.call
+
+            expect(fake_server).to(have_received(:shutdown))
+          end
+        end
+      end
+
+      it "shuts down server" do
+        server = app.run!
+        server.shutdown!
+
+        expect(Process).to(have_received(:kill).with("TERM", pid))
+        expect(Process).to(have_received(:wait).with(pid))
+      end
     end
 
-    it "respects the SIDEKIQ_ALIVE_HOST environment variable" do
-      expect(described_class.host).to(eq("1.2.3.4"))
-    end
-  end
+    context "with changed host, port and path configuration" do
+      around(&around_config)
 
-  describe "SidekiqAlive setup port" do
-    before do
-      ENV["SIDEKIQ_ALIVE_PORT"] = "4567"
-      SidekiqAlive.config.set_defaults
-    end
+      it "starts with updated configuration" do
+        app.run!
 
-    after do
-      ENV["SIDEKIQ_ALIVE_PORT"] = nil
-    end
+        expect(Process).to(have_received(:fork)) do |&block|
+          block.call
 
-    it "respects the SIDEKIQ_ALIVE_PORT environment variable" do
-      expect(described_class.port).to(eq("4567"))
-      expect(described_class.server).to(eq("webrick"))
-    end
-  end
-
-  describe "SidekiqAlive setup server" do
-    before do
-      ENV["SIDEKIQ_ALIVE_SERVER"] = "puma"
-      SidekiqAlive.config.set_defaults
-    end
-
-    after do
-      ENV["SIDEKIQ_ALIVE_SERVER"] = nil
-    end
-
-    it "respects the SIDEKIQ_ALIVE_PORT environment variable" do
-      expect(described_class.server).to(eq("puma"))
-    end
-  end
-
-  describe "SidekiqAlive setup path" do
-    before do
-      ENV["SIDEKIQ_ALIVE_PATH"] = "/sidekiq-probe"
-      SidekiqAlive.config.set_defaults
-    end
-
-    after do
-      ENV["SIDEKIQ_ALIVE_PATH"] = nil
-    end
-
-    it "respects the SIDEKIQ_ALIVE_PORT environment variable" do
-      expect(described_class.path).to(eq("/sidekiq-probe"))
-    end
-
-    it "responds ok to the given path" do
-      allow(SidekiqAlive).to(receive(:alive?) { true })
-      get "/sidekiq-probe"
-      expect(last_response).to(be_ok)
+          expect(fake_server).to(have_received(:run).with(
+            SidekiqAlive::Server::Rack, Port: 4567, Host: "1.2.3.4", AccessLog: [], Logger: SidekiqAlive.logger
+          ))
+        end
+      end
     end
   end
 end

@@ -262,13 +262,6 @@ SidekiqAlive.setup do |config|
   #
   #    config.queue_prefix = :other
 
-  # ==> Rack server
-  # Web server used to serve an HTTP response.
-  # Can also be set with the environment variable SIDEKIQ_ALIVE_SERVER.
-  # default: 'webrick'
-  #
-  #    config.server = 'puma'
-
   # ==> Concurrency
   # The maximum number of Redis connections requested for the SidekiqAlive pool.
   # Can also be set with the environment variable SIDEKIQ_ALIVE_CONCURRENCY.
@@ -276,6 +269,15 @@ SidekiqAlive.setup do |config|
   # default: 2
   #
   #    config.concurrency = 3
+
+  # ==> Rack server
+  # Web server used to serve an HTTP response. By default simple GServer based http server is used.
+  # To use specific server, rack gem version > 2 is required. For rack version >= 3, rackup gem is required.
+  # Can also be set with the environment variable SIDEKIQ_ALIVE_SERVER.
+  # default: nil
+  #
+  #    config.server = 'puma'
+
 end
 ```
 

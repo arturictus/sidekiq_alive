@@ -9,6 +9,10 @@ RSpec.describe(SidekiqAlive::Server::Rack) do
 
   subject(:app) { described_class }
 
+  before do
+    described_class.instance_variable_set(:@quiet, nil)
+  end
+
   context "with default configuration" do
     it "responds with success when the service is alive" do
       allow(SidekiqAlive).to(receive(:alive?) { true })
@@ -50,6 +54,18 @@ RSpec.describe(SidekiqAlive::Server::Rack) do
 
       get "/sidekiq-probe"
       expect(last_response).to(be_ok)
+    end
+  end
+
+  context "with quiet mode" do
+    before do
+      described_class.instance_variable_set(:@quiet, Time.now)
+    end
+
+    it "responds with success and server is shutting down message" do
+      get "/"
+      expect(last_response).to(be_ok)
+      expect(last_response.body).to(eq("Server is shutting down"))
     end
   end
 end

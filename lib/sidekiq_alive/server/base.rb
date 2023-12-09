@@ -8,6 +8,7 @@ module SidekiqAlive
 
       # set web server to quiet mode
       def quiet!
+        logger.info("[SidekiqAlive] Setting web server to quiet mode")
         Process.kill(QUIET_SIGNAL, @server_pid) unless @server_pid.nil?
       end
 

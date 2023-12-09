@@ -14,10 +14,10 @@ module SidekiqAlive
             @handler = handler
             configure_shutdown_signal { @handler.shutdown }
             configure_quiet_signal { @quiet = Time.now }
-            configure_shutdown
 
             @handler.run(self, Port: port, Host: host, AccessLog: [], Logger: logger)
           end
+          configure_shutdown
 
           self
         end

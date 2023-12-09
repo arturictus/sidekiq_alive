@@ -16,11 +16,11 @@ module SidekiqAlive
             # stop is wrapped in a thread because gserver calls synchrnonize which raises an error when in trap context
             configure_shutdown_signal { Thread.new { @server.stop } }
             configure_quiet_signal { @server.quiet! }
-            configure_shutdown
 
             @server.start
             @server.join
           end
+          configure_shutdown
           logger.info("[SidekiqAlive] Web server started in subprocess with pid #{@server_pid}")
 
           self

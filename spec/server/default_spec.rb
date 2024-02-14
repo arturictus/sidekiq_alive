@@ -53,4 +53,16 @@ RSpec.describe(SidekiqAlive::Server::Default) do
       expect(@last_response.code).to(eq("200"))
     end
   end
+
+  context "with quiet mode" do
+    before do
+      server.quiet!
+    end
+
+    it "responds with success and server is shutting down message" do
+      get "/"
+      expect(@last_response.code).to(eq("200"))
+      expect(@last_response.body).to(eq("Server is shutting down"))
+    end
+  end
 end

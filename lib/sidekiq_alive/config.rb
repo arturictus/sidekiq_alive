@@ -16,7 +16,8 @@ module SidekiqAlive
                   :logger,
                   :shutdown_callback,
                   :concurrency,
-                  :server
+                  :server,
+                  :quiet_timeout
 
     def initialize
       set_defaults
@@ -35,6 +36,7 @@ module SidekiqAlive
       @shutdown_callback = proc {}
       @concurrency = Integer(ENV.fetch("SIDEKIQ_ALIVE_CONCURRENCY", 2), exception: false) || 2
       @server = ENV.fetch("SIDEKIQ_ALIVE_SERVER", nil)
+      @quiet_timeout = Integer(ENV.fetch("SIDEKIQ_ALIVE_QUIET_TIMEOUT", 180), exception: false) || 180
     end
 
     def registration_ttl

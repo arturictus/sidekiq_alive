@@ -28,9 +28,7 @@ module SidekiqAlive
           end
 
           logger.info("[SidekiqAlive] #{startup_info}")
-
           register_current_instance
-
           store_alive_key
           # Passing the hostname argument it's only for debugging enqueued jobs
           SidekiqAlive::Worker.perform_async(hostname)
@@ -40,14 +38,17 @@ module SidekiqAlive
         end
 
         sq_config.on(:quiet) do
-          unregister_current_instance
-          config.shutdown_callback.call
+          logger.info("[SidekiqAlive] #{shutdown_info}")
+          purge_pending_jobs
+          # set web server to quiet mode
+          @server&.quiet!
         end
 
         sq_config.on(:shutdown) do
-          @server&.shutdown!
-
-          unregister_current_instance
+          remove_queue
+          # make sure correct redis connection pool is used
+          # sidekiq will terminate non internal capsules
+          Redis.adapter("internal").zrem(HOSTNAME_REGISTRY, current_instance_register_key)
           config.shutdown_callback.call
         end
       end
@@ -59,13 +60,6 @@ module SidekiqAlive
 
     def register_current_instance
       register_instance(current_instance_register_key)
-    end
-
-    def unregister_current_instance
-      # Delete any pending jobs for this instance
-      logger.info("[SidekiqAlive] #{shutdown_info}")
-      purge_pending_jobs
-      redis.zrem(HOSTNAME_REGISTRY, current_instance_register_key)
     end
 
     def registered_instances
@@ -81,9 +75,14 @@ module SidekiqAlive
       else
         schedule_set.scan('"class":"SidekiqAlive::Worker"').select { |job| job.queue == current_queue }
       end
-      logger.info("[SidekiqAlive] Purging #{jobs.count} pending for #{hostname}")
-      jobs.each(&:delete)
 
+      unless jobs.empty?
+        logger.info("[SidekiqAlive] Purging #{jobs.count} pending jobs for #{hostname}")
+        jobs.each(&:delete)
+      end
+    end
+
+    def remove_queue
       logger.info("[SidekiqAlive] Removing queue #{current_queue}")
       Sidekiq::Queue.new(current_queue).clear
     end

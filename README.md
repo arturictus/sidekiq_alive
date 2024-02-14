@@ -247,12 +247,10 @@ SidekiqAlive.setup do |config|
   #    config.callback = proc { Net::HTTP.get("https://status.com/ping") }
 
   # ==> Shutdown callback
-  # When sidekiq process is shutting down, you can perform some action, like cleaning up created queue
+  # When sidekiq process is shutting down, you can perform some arbitrary action.
   # default: proc {}
   #
-  #    config.shutdown_callback = proc do
-  #      Sidekiq::Queue.all.find { |q| q.name == "#{config.queue_prefix}-#{SidekiqAlive.hostname}" }&.clear
-  #    end
+  #    config.shutdown_callback = proc { puts "Sidekiq is shutting down" }
 
   # ==> Queue Prefix
   # SidekiqAlive will run in a independent queue for each instance/replica
@@ -277,6 +275,16 @@ SidekiqAlive.setup do |config|
   # default: nil
   #
   #    config.server = 'puma'
+
+  # ==> Quiet mode timeout in seconds
+  # When sidekiq is shutting down, the Sidekiq process stops pulling jobs from the queue. This includes alive key update job. In case of
+  # long running jobs, alive key can expire before the job is finished. To avoid this, web server is set in to quiet mode
+  # and is returning 200 OK for healthcheck requests. To avoid infinite quiet mode in case sidekiq process is stuck in shutdown,
+  # timeout can be set. After timeout is reached, web server resumes normal operations and will return unhealthy status in case
+  # alive key is expired or purged from redis.
+  # default: 180
+  #
+  #    config.quiet_timeout = 300
 
 end
 ```

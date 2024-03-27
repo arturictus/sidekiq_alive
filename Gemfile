@@ -9,7 +9,7 @@ gemspec
 
 gem "sidekiq", ENV["SIDEKIQ_VERSION_RANGE"] || "< 8"
 
-gem "ruby-lsp", "~> 0.14.0", group: :development
+gem "ruby-lsp", "~> 0.15.0", group: :development
 
 group :test do
   gem "simplecov", require: false

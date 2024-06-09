@@ -148,7 +148,7 @@ module SidekiqAlive
     end
 
     def successful_startup_text
-      "Successfully started sidekiq-alive, registered with key: "\
+      "Successfully started sidekiq-alive, registered with key: " \
         "#{current_instance_register_key} on set #{HOSTNAME_REGISTRY}"
     end
 

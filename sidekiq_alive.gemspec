@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
 
   spec.version       = SidekiqAlive::VERSION
 
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.1")
 
   spec.homepage      = "https://github.com/arturictus/sidekiq_alive"
   spec.summary       = "Liveness probe for sidekiq on Kubernetes deployments."

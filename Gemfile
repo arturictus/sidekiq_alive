@@ -13,7 +13,7 @@ gem "ruby-lsp", "~> 0.14.0", group: :development
 
 group :test do
   gem "simplecov", require: false
-  gem "simplecov-cobertura"
+  gem "simplecov-cobertura", require: false
 
   # used for testing rack based server
   gem "rack-test", "~> 2.1.0"

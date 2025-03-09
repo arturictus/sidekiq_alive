@@ -57,7 +57,7 @@ RSpec.describe(SidekiqAlive::Server, :aggregate_failures) do
 
           expect(fake_server).to(have_received(:stop))
         end
-        expect(Signal).to(have_received(:trap).with("USR1")) do |&arg|
+        expect(Signal).to(have_received(:trap).with("TSTP")) do |&arg|
           arg.call
 
           expect(fake_server).to(have_received(:quiet!))
@@ -113,7 +113,7 @@ RSpec.describe(SidekiqAlive::Server, :aggregate_failures) do
 
           expect(fake_server).to(have_received(:shutdown))
         end
-        expect(Signal).to(have_received(:trap).with("USR1")) do |&arg|
+        expect(Signal).to(have_received(:trap).with("TSTP")) do |&arg|
           arg.call
 
           expect(SidekiqAlive::Server::Rack.instance_variable_get(:@quiet)).to(be_instance_of(Time))

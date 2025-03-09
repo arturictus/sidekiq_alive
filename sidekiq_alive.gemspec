@@ -50,5 +50,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency("solargraph", "~> 0.50.0")
 
   spec.add_dependency("gserver", "~> 0.0.1")
-  spec.add_dependency("sidekiq", ">= 5", "< 8")
+  spec.add_dependency("sidekiq", ">= 5", "< 9")
 end

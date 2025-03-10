@@ -4,7 +4,7 @@ module SidekiqAlive
   module Server
     module Base
       SHUTDOWN_SIGNAL = "TERM"
-      QUIET_SIGNAL = "USR1"
+      QUIET_SIGNAL = "TSTP"
 
       # set web server to quiet mode
       def quiet!

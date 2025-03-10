@@ -28,7 +28,9 @@ jobs:
       matrix:
         ruby-version: ["3.3", "3.2", "3.1"]
         sidekiq-version: ["~> 6.5", "~> 7", "~> 8"]
-        with-rackup: [true, false]
+        exclude:
+          - sidekiq-version: "~> 8"
+            ruby-version: "3.1"
     # Service containers to run with `runner-job`
     services:
       # Label used to access the service container
@@ -54,12 +56,10 @@ jobs:
           cache-version: 1
         env:
           SIDEKIQ_VERSION_RANGE: ${{ matrix.sidekiq-version }}
-          WITH_RACKUP: ${{ matrix.with-rackup }}
       - name: Run tests
         run: bundle exec rspec --force-color
         env:
           SIDEKIQ_VERSION_RANGE: ${{ matrix.sidekiq-version }}
-          WITH_RACKUP: ${{ matrix.with-rackup }}
       - name: Add coverage report
         uses: insightsengineering/coverage-action@v2
         # TODO: Add coverage merging from different test runs

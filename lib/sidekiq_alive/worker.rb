@@ -7,6 +7,7 @@ module SidekiqAlive
 
     # Passing the hostname argument it's only for debugging enqueued jobs
     def perform(_hostname = SidekiqAlive.hostname)
+      # Checks if custom liveness probe passes should fail or return false
       return unless config.custom_liveness_probe.call
 
       # Writes the liveness in Redis

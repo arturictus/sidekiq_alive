@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
 
   spec.version       = SidekiqAlive::VERSION
 
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 3.1")
 
   spec.homepage      = "https://github.com/arturictus/sidekiq_alive"
   spec.summary       = "Liveness probe for sidekiq on Kubernetes deployments."
@@ -43,14 +43,12 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency("bundler", "> 1.16")
   spec.add_development_dependency("debug", "~> 1.6")
-  spec.add_development_dependency("rack-test", "~> 2.1.0")
   spec.add_development_dependency("rake", "~> 13.0")
   spec.add_development_dependency("rspec", "~> 3.0")
-  spec.add_development_dependency("rspec-sidekiq", "~> 4.0")
+  spec.add_development_dependency("rspec-sidekiq", "~> 5.0")
   spec.add_development_dependency("rubocop-shopify", "~> 2.10")
-  spec.add_development_dependency("solargraph", "~> 0.49.0")
+  spec.add_development_dependency("solargraph", "~> 0.52.0")
 
-  spec.add_dependency("rack", "< 3")
-  spec.add_dependency("sidekiq", ">= 5", "< 8")
-  spec.add_dependency("webrick", ">= 1", "< 2")
+  spec.add_dependency("gserver", "~> 0.0.1")
+  spec.add_dependency("sidekiq", ">= 5", "< 9")
 end

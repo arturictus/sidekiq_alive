@@ -133,6 +133,7 @@ RSpec.describe(SidekiqAlive) do
     end
 
     context "::start" do
+      let(:server) { double("Server", quiet!: nil) }
       let(:queue_prefix) { :heathcheck }
       let(:queues) do
         next Sidekiq.default_configuration.capsules[SidekiqAlive::CAPSULE_NAME].queues if sidekiq_7
@@ -141,8 +142,8 @@ RSpec.describe(SidekiqAlive) do
       end
 
       before do
-        allow(SidekiqAlive).to(receive(:fork) { 1 })
-        allow(sq_config).to(receive(:on).with(:startup) { |&arg| arg.call })
+        allow(SidekiqAlive::Server).to(receive(:run!) { server })
+        allow(sq_config).to(receive(:on).with(:startup).and_yield)
 
         SidekiqAlive.instance_variable_set(:@redis, nil)
       end
@@ -153,13 +154,27 @@ RSpec.describe(SidekiqAlive) do
         expect(SidekiqAlive.registered_instances.first).to(include("test-hostname"))
       end
 
-      it "::unregister_current_instance" do
+      it "::on(:quiet)" do
         SidekiqAlive.start
 
         expect(sq_config).to(have_received(:on).with(:quiet)) do |&arg|
           arg.call
 
+          expect(server).to(have_received(:quiet!))
+        end
+      end
+
+      it "::on(:shutdown)" do
+        callback = double("callback", call: nil)
+        SidekiqAlive.config.shutdown_callback = callback
+
+        SidekiqAlive.start
+
+        expect(sq_config).to(have_received(:on).with(:shutdown)) do |&arg|
+          arg.call
+
           expect(SidekiqAlive.registered_instances.count).to(eq(0))
+          expect(callback).to(have_received(:call))
         end
       end
 

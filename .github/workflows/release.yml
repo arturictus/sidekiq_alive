@@ -3,10 +3,14 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: Release version
+      semver:
+        description: Bump
         required: true
-        type: string
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
 
 jobs:
   release:
@@ -30,7 +34,7 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           bundle config unset deployment
-          bundle exec rake "version[${{ inputs.version }}]" && git push
+          bundle exec rake "version[${{ inputs.semver }}]" && git push
       -
         name: Create tag and push to rubygems
         run: bundle exec rake release

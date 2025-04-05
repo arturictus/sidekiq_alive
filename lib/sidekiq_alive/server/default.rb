@@ -72,7 +72,7 @@ module SidekiqAlive
       attr_reader :path
 
       def quiet?
-        @quiet && (@quiet - Time.now) < SidekiqAlive.config.quiet_timeout
+        @quiet && (Time.now - @quiet) < SidekiqAlive.config.quiet_timeout
       end
     end
   end

@@ -51,7 +51,7 @@ module SidekiqAlive
         private
 
         def quiet?
-          @quiet && (@quiet - Time.now) < SidekiqAlive.config.quiet_timeout
+          @quiet && (Time.now - @quiet) < SidekiqAlive.config.quiet_timeout
         end
 
         def handler

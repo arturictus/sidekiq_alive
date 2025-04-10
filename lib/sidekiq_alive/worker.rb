@@ -37,7 +37,7 @@ module SidekiqAlive
       Sidekiq::Queue.all
         .filter { |q| q.name.start_with?(config.queue_prefix.to_s) }
         .filter { |q| q.latency > latency_threshold }
-        .filter { |q| q.size == 1 }
+        .filter { |q| q.size == 1 && q.all? { |job| job.klass == self.class.name } }
         .each(&:clear)
     end
 

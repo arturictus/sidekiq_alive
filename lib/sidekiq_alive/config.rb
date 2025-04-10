@@ -42,5 +42,9 @@ module SidekiqAlive
     def registration_ttl
       @registration_ttl || time_to_live * 3
     end
+
+    def worker_interval
+      time_to_live / 2
+    end
   end
 end

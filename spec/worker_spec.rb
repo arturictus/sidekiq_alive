@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe(SidekiqAlive::Worker) do
-  subject(:perform_inline) do
-    described_class.perform_inline
+  subject(:perform) do
+    described_class.new.perform
   end
 
   context "When being executed in the same instance" do
@@ -11,7 +11,7 @@ RSpec.describe(SidekiqAlive::Worker) do
       expect(described_class).to(receive(:perform_in))
       n = 0
       SidekiqAlive.config.callback = proc { n = 2 }
-      perform_inline
+      perform
       expect(n).to(eq(2))
       expect(SidekiqAlive.alive?).to(be(true))
     end
@@ -26,7 +26,7 @@ RSpec.describe(SidekiqAlive::Worker) do
         raise "Nop"
       end
       begin
-        perform_inline
+        perform
       rescue StandardError
         nil
       end
@@ -38,7 +38,7 @@ RSpec.describe(SidekiqAlive::Worker) do
       expect(described_class).to(receive(:perform_in))
       n = 0
       SidekiqAlive.config.custom_liveness_probe = proc { n = 2 }
-      perform_inline
+      perform
 
       expect(n).to(eq(2))
       expect(SidekiqAlive.alive?).to(be(true))
@@ -60,7 +60,7 @@ RSpec.describe(SidekiqAlive::Worker) do
 
       allow(Sidekiq::Queue).to(receive(:all).and_return([queue, imposter_queue, orphaned_queue, orphaning_queue]))
 
-      perform_inline
+      perform
 
       expect(queue).not_to(have_received(:clear))
       expect(imposter_queue).not_to(have_received(:clear))

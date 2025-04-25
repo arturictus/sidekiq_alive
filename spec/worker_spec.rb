@@ -1,25 +1,23 @@
 # frozen_string_literal: true
 
 RSpec.describe(SidekiqAlive::Worker) do
-  context "When being executed in the same instance" do
-    subject do
-      described_class.new.perform
-    end
+  subject(:perform) do
+    described_class.new.perform
+  end
 
+  context "When being executed in the same instance" do
     it "stores alive key and requeues it self" do
       SidekiqAlive.register_current_instance
       expect(described_class).to(receive(:perform_in))
       n = 0
       SidekiqAlive.config.callback = proc { n = 2 }
-      subject
+      perform
       expect(n).to(eq(2))
       expect(SidekiqAlive.alive?).to(be(true))
     end
   end
+
   context "custom liveness probe" do
-    subject do
-      described_class.new.perform
-    end
     it "on error" do
       expect(described_class).not_to(receive(:perform_in))
       n = 0
@@ -28,21 +26,46 @@ RSpec.describe(SidekiqAlive::Worker) do
         raise "Nop"
       end
       begin
-        subject
+        perform
       rescue StandardError
         nil
       end
       expect(n).to(eq(2))
       expect(SidekiqAlive.alive?).to(be(false))
     end
+
     it "on success" do
       expect(described_class).to(receive(:perform_in))
       n = 0
       SidekiqAlive.config.custom_liveness_probe = proc { n = 2 }
-      subject
+      perform
 
       expect(n).to(eq(2))
       expect(SidekiqAlive.alive?).to(be(true))
+    end
+  end
+
+  describe "orphaned queues removal" do
+    it "removes orphaned queues" do
+      queue = instance_double(Sidekiq::Queue, name: "notifications", latency: 10_000, size: 1, clear: nil)
+      orphaning_queue = instance_double(Sidekiq::Queue, name: "sidekiq-alive-bar", latency: 200, size: 1, clear: nil)
+
+      orphaned_queue = instance_double(Sidekiq::Queue, name: "sidekiq-alive-foo", latency: 350, size: 1, clear: nil)
+      alive_job = instance_double(Sidekiq::JobRecord, klass: "SidekiqAlive::Worker")
+      allow(orphaned_queue).to(receive(:all?).and_yield(alive_job))
+
+      imposter_queue = instance_double(Sidekiq::Queue, name: "sidekiq-aliveness", latency: 10_000, size: 1, clear: nil)
+      job = instance_double(Sidekiq::JobRecord, klass: "AlivenessWorker")
+      allow(imposter_queue).to(receive(:all?).and_yield(job))
+
+      allow(Sidekiq::Queue).to(receive(:all).and_return([queue, imposter_queue, orphaned_queue, orphaning_queue]))
+
+      perform
+
+      expect(queue).not_to(have_received(:clear))
+      expect(imposter_queue).not_to(have_received(:clear))
+      expect(orphaned_queue).to(have_received(:clear))
+      expect(orphaning_queue).not_to(have_received(:clear))
     end
   end
 end

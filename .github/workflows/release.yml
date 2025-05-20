@@ -21,9 +21,10 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
       -
-        name: Set up Ruby 3.1
+        name: Set up Ruby 3.3
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true

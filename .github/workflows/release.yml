@@ -21,8 +21,7 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          ssh-key: ${{ secrets.RELEASE_SSH_KEY }}
+          token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
       -
         name: Set up Ruby 3.1
         uses: ruby/setup-ruby@v1

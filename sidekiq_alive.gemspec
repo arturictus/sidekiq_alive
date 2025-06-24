@@ -48,7 +48,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency("rspec-sidekiq", "~> 5.0")
   spec.add_development_dependency("rubocop-shopify", "~> 2.10")
   spec.add_development_dependency("semver2", "~> 3.4")
-  spec.add_development_dependency("solargraph", "~> 0.54.0")
+  spec.add_development_dependency("solargraph", "~> 0.55.2")
 
   spec.add_dependency("gserver", "~> 0.0.1")
   spec.add_dependency("sidekiq", ">= 5", "< 9")

@@ -50,7 +50,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency("semver2", "~> 3.4")
   spec.add_development_dependency("solargraph", "~> 0.54.0")
 
-  spec.add_dependency("base64", ">= 0", "< 1")
+  spec.add_dependency("base64", ">= 0", "< 1") # sidekiq 6 requires base64 which is not part of stdlib in Ruby 3.4+
   spec.add_dependency("gserver", "~> 0.0.1")
   spec.add_dependency("sidekiq", ">= 5", "< 9")
 end

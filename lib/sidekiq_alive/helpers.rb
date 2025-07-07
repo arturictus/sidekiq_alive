@@ -3,16 +3,16 @@
 module SidekiqAlive
   module Helpers
     class << self
-      def sidekiq_7
+      def sidekiq_7?
         current_sidekiq_version >= Gem::Version.new("7")
       end
 
-      def sidekiq_6
+      def sidekiq_6?
         current_sidekiq_version >= Gem::Version.new("6") &&
           current_sidekiq_version < Gem::Version.new("7")
       end
 
-      def sidekiq_5
+      def sidekiq_5?
         current_sidekiq_version >= Gem::Version.new("5") &&
           current_sidekiq_version < Gem::Version.new("6")
       end

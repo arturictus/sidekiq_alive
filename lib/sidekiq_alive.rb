@@ -18,7 +18,7 @@ module SidekiqAlive
         sq_config.on(:startup) do
           SidekiqAlive::Worker.sidekiq_options(queue: current_queue)
 
-          if Helpers.sidekiq_7
+          if Helpers.sidekiq_7?
             sq_config.capsule(CAPSULE_NAME) do |cap|
               cap.concurrency = config.concurrency
               cap.queues = [current_queue]
@@ -70,7 +70,7 @@ module SidekiqAlive
 
     def purge_pending_jobs
       schedule_set = Sidekiq::ScheduledSet.new
-      jobs = if Helpers.sidekiq_5
+      jobs = if Helpers.sidekiq_5?
         schedule_set.select { |job| job.klass == "SidekiqAlive::Worker" && job.queue == current_queue }
       else
         schedule_set.scan('"class":"SidekiqAlive::Worker"').select { |job| job.queue == current_queue }

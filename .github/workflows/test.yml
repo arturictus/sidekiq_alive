@@ -61,7 +61,7 @@ jobs:
         env:
           SIDEKIQ_VERSION_RANGE: ${{ matrix.sidekiq-version }}
       - name: Add coverage report
-        uses: insightsengineering/coverage-action@v2
+        uses: insightsengineering/coverage-action@v3
         # TODO: Add coverage merging from different test runs
         if: ${{ matrix.ruby-version == '3.4' && matrix.sidekiq-version == '~> 7' }}
         with:

@@ -130,7 +130,7 @@ _kube/sidekiq_quiet_
 
 # Find Pid
 SIDEKIQ_PID=$(ps aux | grep sidekiq | grep busy | awk '{ print $2 }')
-# Send TSTP signal
+# Send TSTP signal. Note: Alpine Linux needs to use `kill -s SIGTSTP` instead of `kill -TSTP`
 kill -SIGTSTP $SIDEKIQ_PID
 ```
 

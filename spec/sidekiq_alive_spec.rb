@@ -92,7 +92,7 @@ RSpec.describe(SidekiqAlive) do
   end
 
   context "with redis" do
-    let(:sidekiq_7) { SidekiqAlive::Helpers.sidekiq_7 }
+    let(:sidekiq_7) { SidekiqAlive::Helpers.sidekiq_7? }
     # Older versions of sidekiq yielded Sidekiq module as configuration object
     # With sidekiq > 7, configuration is a separate class
     let(:sq_config) { sidekiq_7 ? Sidekiq.default_configuration : Sidekiq }

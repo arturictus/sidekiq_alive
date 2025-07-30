@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: ["3.3", "3.2", "3.1"]
+        ruby-version: ["3.4", "3.3", "3.2"]
         sidekiq-version: ["~> 6.5", "~> 7", "~> 8"]
         exclude:
           - sidekiq-version: "~> 8"
@@ -63,7 +63,7 @@ jobs:
       - name: Add coverage report
         uses: insightsengineering/coverage-action@v2
         # TODO: Add coverage merging from different test runs
-        if: ${{ matrix.ruby-version == '3.3' && matrix.sidekiq-version == '~> 7' && matrix.with-rackup == false }}
+        if: ${{ matrix.ruby-version == '3.4' && matrix.sidekiq-version == '~> 7' }}
         with:
           path: coverage/coverage.xml
           publish: true

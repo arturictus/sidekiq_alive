@@ -21,7 +21,7 @@ group :test do
   if ["7", "8"].any? { |range| ENV["SIDEKIQ_VERSION_RANGE"]&.include?(range) }
     gem "rackup", "~> 2.2.0"
   else
-    gem "rack", "< 3"
+    gem "rack", "< 4"
     gem "webrick", "< 2"
   end
 end

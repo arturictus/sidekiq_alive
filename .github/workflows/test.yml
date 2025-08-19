@@ -12,7 +12,7 @@ jobs:
   rubocop:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -47,7 +47,7 @@ jobs:
           # Maps port 6379 on service container to the host
           - 6379:6379
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Ruby ${{ matrix.ruby-version }} with Sidekiq ${{ matrix.sidekiq-version }}
         uses: ruby/setup-ruby@v1
         with:

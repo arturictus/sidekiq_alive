@@ -30,6 +30,11 @@ module SidekiqAlive
           logger.info("[SidekiqAlive] #{startup_info}")
           register_current_instance
           store_alive_key
+
+          # Purge remaining jobs from previous instances
+          purge_pending_jobs
+          remove_queue
+
           # Passing the hostname argument it's only for debugging enqueued jobs
           SidekiqAlive::Worker.perform_async(hostname)
           @server = SidekiqAlive::Server.run!

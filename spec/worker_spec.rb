@@ -50,9 +50,9 @@ RSpec.describe(SidekiqAlive::Worker) do
       queue = instance_double(Sidekiq::Queue, name: "notifications", latency: 10_000, size: 1, clear: nil)
       orphaning_queue = instance_double(Sidekiq::Queue, name: "sidekiq-alive-bar", latency: 200, size: 1, clear: nil)
 
-      orphaned_queue = instance_double(Sidekiq::Queue, name: "sidekiq-alive-foo", latency: 350, size: 1, clear: nil)
+      orphaned_queue = instance_double(Sidekiq::Queue, name: "sidekiq-alive-foo", latency: 350, size: 2, clear: nil)
       alive_job = instance_double(Sidekiq::JobRecord, klass: "SidekiqAlive::Worker")
-      allow(orphaned_queue).to(receive(:all?).and_yield(alive_job))
+      allow(orphaned_queue).to(receive(:all?).and_yield(alive_job).and_yield(alive_job))
 
       imposter_queue = instance_double(Sidekiq::Queue, name: "sidekiq-aliveness", latency: 10_000, size: 1, clear: nil)
       job = instance_double(Sidekiq::JobRecord, klass: "AlivenessWorker")

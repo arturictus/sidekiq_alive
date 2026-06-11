@@ -185,6 +185,38 @@ RSpec.describe(SidekiqAlive) do
 
         expect(queues.first).to(eq("#{queue_prefix}-test-hostname"))
       end
+
+      context "with previously existing jobs" do
+        let(:current_queue) { SidekiqAlive.current_queue }
+        around do |example|
+          Sidekiq::Testing.disable! { example.run }
+        end
+
+        before do
+          SidekiqAlive::Worker.set(queue: current_queue).perform_async(SidekiqAlive.hostname)
+          SidekiqAlive::Worker.set(queue: current_queue).perform_async(SidekiqAlive.hostname)
+          SidekiqAlive::Worker.set(queue: current_queue).perform_in(300, SidekiqAlive.hostname)
+          SidekiqAlive::Worker.set(queue: current_queue).perform_in(300, SidekiqAlive.hostname)
+        end
+
+        def scheduled_jobs(queue)
+          if SidekiqAlive::Helpers.sidekiq_5?
+            Sidekiq::ScheduledSet.new.select { |job| job.klass == "SidekiqAlive::Worker" && job.queue == queue }
+          else
+            Sidekiq::ScheduledSet.new.scan('"class":"SidekiqAlive::Worker"').select { |job| job.queue == queue }
+          end
+        end
+
+        it "purges old jobs from queue and scheduled set" do
+          expect(Sidekiq::Queue.new(current_queue)).to(have_attributes(size: 2))
+          expect(scheduled_jobs(current_queue).count).to(eq(2))
+
+          SidekiqAlive.start
+
+          expect(Sidekiq::Queue.new(current_queue)).to(have_attributes(size: 1))
+          expect(scheduled_jobs(current_queue).count).to(eq(0))
+        end
+      end
     end
   end
 end
